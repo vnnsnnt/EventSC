@@ -14,6 +14,8 @@ class BrowseTableViewController: UITableViewController {
 
     var debug = true
     
+    let database = Firestore.firestore()
+
     @IBOutlet weak var signUpButton: UIBarButtonItem!;
     @IBOutlet weak var logoutButton: UIBarButtonItem!;
     
@@ -48,25 +50,52 @@ class BrowseTableViewController: UITableViewController {
         
         debug ? print("Loading Browse Page") : ()
         
+        eventDataModel = EventDataModel.sharedInstance
+        
+        let eventsRef = database.collection("events")
+        let query = eventsRef
+        query.getDocuments() { (querySnapshot, queryError) in
+            if queryError == nil {
+                let documents = querySnapshot!.documents
+                var events = [Event]()
+                
+                for document in documents {
+                    let data = document.data()
+                    let title = data["title"] as? String ?? "title_not_found"
+                    let description = data["description"] as? String ?? "description_not_found"
+                    let locationTitle = data["locationTitle"] as? String ?? "location_title_not_found"
+                    let locationAddress = data["locationAddress"] as? String ?? "location_address_not_found"
+                    let imageUrl = data["imageUrl"] as? String ?? "image_not_found"
+                    let email = data["email"] as? String ?? "email_not_found"
+                    let name = data["name"] as? String ?? "name_not_found"
+                    let eventId = data["event-id"] as? String ?? "event_id_not_found"
+                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId)
+                    events.append(event)
+                }
+                
+                !events.isEmpty ? self.eventDataModel.setPublicEvents(events: events) : ()
+            }
+        }
+        
         isLoggedIn = false
+        self.tableView.reloadData()
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance
+        if eventDataModel.getUser() != nil {
+            isLoggedIn = true
+        }
+        self.tableView.reloadData()
     }
 
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return eventDataModel.getPublicEvents().count;
     }
-
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showLoginView" {
@@ -85,6 +114,16 @@ class BrowseTableViewController: UITableViewController {
                 self.dismiss(animated: true, completion: nil)
             }
         }
+        
+        if segue.identifier == "showDetailsView" {
+            // Get the destination view controller
+            let destinationVC = segue.destination as! EventDetailsViewController
+            
+            // Pass the selected event to the destination view controller
+            let selectedEvent = sender as! Event
+            destinationVC.event = selectedEvent
+            
+        }
     }
     
     
@@ -99,15 +138,44 @@ class BrowseTableViewController: UITableViewController {
             print("Error signing out: \(signOutError)")
         }
     }
-    /*
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
-
+        let event = eventDataModel.getPublicEvents()[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "eventCell", for: indexPath) as! EventTableViewCell
+        cell.eventTitle.text = event.getTitle();
+        cell.eventDescription.text = event.getDescription()
+        cell.eventDateTime.text = "10:00 PM, Tuesday, Aug 2023"
+        cell.eventLocation.text = "@ " + event.getLocationTitle()!
+        let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
+        cell.thumbnail.kf.setImage(with: url)
         return cell
     }
-    */
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedEvent = eventDataModel.getPublicEvents()[indexPath.row]
+        performSegue(withIdentifier: "showDetailsView", sender: selectedEvent)
+    }
+    
+    
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        let event = eventDataModel.getPublicEvents()[indexPath.row]
+        
+        let bookmarkAction = UIContextualAction(style: .normal, title: "Save Event") { (action, view, completionHandler) in
+            // Perform edit action here
+            completionHandler(true)
+        }
+        bookmarkAction.backgroundColor = .systemGreen
+        let removeAction =  UIContextualAction(style: .normal, title: "Unsave") {
+            (action, view, completionHandler) in
+            completionHandler(true)
+        }
+        removeAction.backgroundColor = .systemRed
+        
+//        let configuration = UISwipeActionsConfiguration(actions: [bookmarkAction])
+        let configuration = UISwipeActionsConfiguration(actions: [removeAction])
+        return configuration
+    }
 
     /*
     // Override to support conditional editing of the table view.

@@ -6,8 +6,9 @@
 //
 
 import UIKit
+import MapKit
 
-class AddEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class AddEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MKLocalSearchCompleterDelegate {
     
     @IBOutlet weak var eventTitle: UITextField!
     @IBOutlet weak var eventDescription: UITextField!
@@ -16,18 +17,28 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
     @IBOutlet weak var previewImage: UIImageView!
     
     var completionHandler: ((Event?) -> Void)?
-
+    
+    var searchCompleter = MKLocalSearchCompleter()
+    var searchResults = [MKLocalSearchCompletion]()
+    var selectedPlace: Place?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        // Set up the search completer
+        searchCompleter.delegate = self
+        searchCompleter.resultTypes = .address
+        
+        // Set up the text field for autocompletion
+        eventLocation.delegate = self
+        eventLocation.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
     @IBAction func savePressed(_sender: UIButton) {
         if let title = eventTitle.text, !title.isEmpty,
            let description = eventDescription.text, !description.isEmpty,
            let location = eventLocation.text, !location.isEmpty {
-            let event: Event = Event(title: title, description: description, location: location, image: previewImage.image)
+            let event: Event = Event(title: title, description: description, locationTitle: selectedPlace?.title, locationAddress: selectedPlace?.address, image: previewImage.image)
             self.completionHandler?(event);
         }
     }
@@ -51,15 +62,46 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
     @IBAction func cancelPressed(_sender: UIButton) {
         self.completionHandler?(nil)
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "addAddressView" {
+            let addAddressView = segue.destination as! AddAddressViewController
+            addAddressView.completionHandler = {(selectedPlace: Place?) in
+                self.selectedPlace = selectedPlace
+                self.eventLocation.text = "\(selectedPlace?.title ?? "No Address Title"), \(selectedPlace?.address ?? "No address provided")"
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
     }
-    */
+    
+}
 
+extension AddEventViewController: UITextFieldDelegate {
+    
+    @objc func textFieldDidChange() {
+        if let searchQuery = eventLocation.text {
+            searchCompleter.queryFragment = searchQuery
+        }
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // Allow the user to type in the text field
+        return true
+    }
+    
+}
+
+extension AddEventViewController {
+    
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        // Store the search results and update the UI
+        searchResults = completer.results
+        print(searchResults)
+    }
+    
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        // Handle the error
+        print(error.localizedDescription)
+    }
+    
 }

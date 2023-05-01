@@ -23,6 +23,10 @@
 		875E95D829FD8EE100FE8928 /* EventTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 875E95D729FD8EE100FE8928 /* EventTableViewCell.swift */; };
 		875E95D929FD8EE100FE8928 /* EventTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 875E95D729FD8EE100FE8928 /* EventTableViewCell.swift */; };
 		875E95DA29FD8EE100FE8928 /* EventTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 875E95D729FD8EE100FE8928 /* EventTableViewCell.swift */; };
+		876FA12229FEF45A000AB7A0 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876FA12129FEF45A000AB7A0 /* MapViewController.swift */; };
+		87A687C629FDF9280018563A /* EventDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A687C529FDF9280018563A /* EventDetailsViewController.swift */; };
+		87AB7FCE29FEFE0B0093418B /* AddAddressViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AB7FCD29FEFE0B0093418B /* AddAddressViewController.swift */; };
+		87AB7FD029FF03770093418B /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AB7FCF29FF03770093418B /* Place.swift */; };
 		87C4939229FB2306003FCEA2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4939129FB2306003FCEA2 /* AppDelegate.swift */; };
 		87C4939429FB2306003FCEA2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4939329FB2306003FCEA2 /* SceneDelegate.swift */; };
 		87C4939629FB2306003FCEA2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4939529FB2306003FCEA2 /* ViewController.swift */; };
@@ -45,9 +49,6 @@
 		87D310FF29FC9FD700E55FA8 /* BrowseTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D310FE29FC9FD700E55FA8 /* BrowseTableViewController.swift */; };
 		87D3110029FC9FD700E55FA8 /* BrowseTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D310FE29FC9FD700E55FA8 /* BrowseTableViewController.swift */; };
 		87D3110129FC9FD700E55FA8 /* BrowseTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D310FE29FC9FD700E55FA8 /* BrowseTableViewController.swift */; };
-		87DACAF929FC5BD0006D0D3F /* BrowseEventsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DACAF829FC5BD0006D0D3F /* BrowseEventsTableViewController.swift */; };
-		87DACAFA29FC5BD0006D0D3F /* BrowseEventsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DACAF829FC5BD0006D0D3F /* BrowseEventsTableViewController.swift */; };
-		87DACAFB29FC5BD0006D0D3F /* BrowseEventsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DACAF829FC5BD0006D0D3F /* BrowseEventsTableViewController.swift */; };
 		87DACAFD29FC5C83006D0D3F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DACAFC29FC5C83006D0D3F /* Event.swift */; };
 		87DACAFE29FC5C83006D0D3F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DACAFC29FC5C83006D0D3F /* Event.swift */; };
 		87DACAFF29FC5C83006D0D3F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DACAFC29FC5C83006D0D3F /* Event.swift */; };
@@ -81,6 +82,10 @@
 		875E95CD29FCC26900FE8928 /* HostedEventsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostedEventsTableViewController.swift; sourceTree = "<group>"; };
 		875E95D129FCCFAC00FE8928 /* SavedEventsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedEventsTableViewController.swift; sourceTree = "<group>"; };
 		875E95D729FD8EE100FE8928 /* EventTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTableViewCell.swift; sourceTree = "<group>"; };
+		876FA12129FEF45A000AB7A0 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		87A687C529FDF9280018563A /* EventDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailsViewController.swift; sourceTree = "<group>"; };
+		87AB7FCD29FEFE0B0093418B /* AddAddressViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAddressViewController.swift; sourceTree = "<group>"; };
+		87AB7FCF29FF03770093418B /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
 		87C4938E29FB2306003FCEA2 /* DuongVincentFinalProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuongVincentFinalProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87C4939129FB2306003FCEA2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		87C4939329FB2306003FCEA2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -99,7 +104,6 @@
 		87D310F629FC7EE000E55FA8 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		87D310FA29FC966E00E55FA8 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		87D310FE29FC9FD700E55FA8 /* BrowseTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseTableViewController.swift; sourceTree = "<group>"; };
-		87DACAF829FC5BD0006D0D3F /* BrowseEventsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowseEventsTableViewController.swift; path = DuongVincentFinalProject/BrowseEventsTableViewController.swift; sourceTree = "<group>"; };
 		87DACAFC29FC5C83006D0D3F /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		87DACB0429FC5F55006D0D3F /* EventDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDataModel.swift; sourceTree = "<group>"; };
 		87DACB0A29FC614F006D0D3F /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -156,6 +160,9 @@
 			children = (
 				875E95C929FCC02800FE8928 /* AddEventViewController.swift */,
 				875E95D729FD8EE100FE8928 /* EventTableViewCell.swift */,
+				87A687C529FDF9280018563A /* EventDetailsViewController.swift */,
+				876FA12129FEF45A000AB7A0 /* MapViewController.swift */,
+				87AB7FCD29FEFE0B0093418B /* AddAddressViewController.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -163,9 +170,9 @@
 		87C4938529FB2306003FCEA2 = {
 			isa = PBXGroup;
 			children = (
+				87AB7FCF29FF03770093418B /* Place.swift */,
 				87D310F029FC7C9B00E55FA8 /* User.swift */,
 				87DACAFC29FC5C83006D0D3F /* Event.swift */,
-				87DACAF829FC5BD0006D0D3F /* BrowseEventsTableViewController.swift */,
 				87C4939029FB2306003FCEA2 /* DuongVincentFinalProject */,
 				87C493AA29FB2308003FCEA2 /* DuongVincentFinalProjectTests */,
 				87C493B429FB2308003FCEA2 /* DuongVincentFinalProjectUITests */,
@@ -383,20 +390,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				87D310FF29FC9FD700E55FA8 /* BrowseTableViewController.swift in Sources */,
+				87AB7FD029FF03770093418B /* Place.swift in Sources */,
 				875E95CA29FCC02800FE8928 /* AddEventViewController.swift in Sources */,
 				875E95D229FCCFAC00FE8928 /* SavedEventsTableViewController.swift in Sources */,
 				875E95D829FD8EE100FE8928 /* EventTableViewCell.swift in Sources */,
+				87A687C629FDF9280018563A /* EventDetailsViewController.swift in Sources */,
 				875E95CE29FCC26900FE8928 /* HostedEventsTableViewController.swift in Sources */,
 				87D310F729FC7EE000E55FA8 /* RegisterViewController.swift in Sources */,
 				87C4939629FB2306003FCEA2 /* ViewController.swift in Sources */,
 				87C4939229FB2306003FCEA2 /* AppDelegate.swift in Sources */,
 				87DACB0529FC5F55006D0D3F /* EventDataModel.swift in Sources */,
 				87C4939C29FB2306003FCEA2 /* DuongVincentFinalProject.xcdatamodeld in Sources */,
+				87AB7FCE29FEFE0B0093418B /* AddAddressViewController.swift in Sources */,
 				87D310F129FC7C9B00E55FA8 /* User.swift in Sources */,
-				87DACAF929FC5BD0006D0D3F /* BrowseEventsTableViewController.swift in Sources */,
 				87DACAFD29FC5C83006D0D3F /* Event.swift in Sources */,
 				87D310FB29FC966E00E55FA8 /* LoginViewController.swift in Sources */,
 				87C4939429FB2306003FCEA2 /* SceneDelegate.swift in Sources */,
+				876FA12229FEF45A000AB7A0 /* MapViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,7 +417,6 @@
 				875E95D929FD8EE100FE8928 /* EventTableViewCell.swift in Sources */,
 				87D310FC29FC966E00E55FA8 /* LoginViewController.swift in Sources */,
 				87DACB0629FC5F55006D0D3F /* EventDataModel.swift in Sources */,
-				87DACAFA29FC5BD0006D0D3F /* BrowseEventsTableViewController.swift in Sources */,
 				87D3110029FC9FD700E55FA8 /* BrowseTableViewController.swift in Sources */,
 				875E95D329FCCFAC00FE8928 /* SavedEventsTableViewController.swift in Sources */,
 				87DACAFE29FC5C83006D0D3F /* Event.swift in Sources */,
@@ -432,7 +441,6 @@
 				87D310FD29FC966E00E55FA8 /* LoginViewController.swift in Sources */,
 				875E95D029FCC26900FE8928 /* HostedEventsTableViewController.swift in Sources */,
 				87C493B829FB2308003FCEA2 /* DuongVincentFinalProjectUITestsLaunchTests.swift in Sources */,
-				87DACAFB29FC5BD0006D0D3F /* BrowseEventsTableViewController.swift in Sources */,
 				87DACB0729FC5F55006D0D3F /* EventDataModel.swift in Sources */,
 				875E95D429FCCFAC00FE8928 /* SavedEventsTableViewController.swift in Sources */,
 				87D3110129FC9FD700E55FA8 /* BrowseTableViewController.swift in Sources */,
@@ -595,6 +603,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4V92TQ9Q78;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DuongVincentFinalProject/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -621,6 +630,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4V92TQ9Q78;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DuongVincentFinalProject/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

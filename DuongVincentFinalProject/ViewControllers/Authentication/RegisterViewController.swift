@@ -80,6 +80,18 @@ class RegisterViewController: UIViewController {
                        }
                        self.eventDataModel.setUser(user: user)
                        
+                       let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+
+                       savedEventsRef.setData([
+                           "saved_event_ids": []
+                       ]) { err in
+                           if let err = err {
+                               print("Error adding saved event: \(err)")
+                           } else {
+                               print("Saved event added successfully")
+                           }
+                       }
+                       
                        self.completionHandler?(user)
 
                    }
