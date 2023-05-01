@@ -259,6 +259,7 @@ class BrowseTableViewController: UITableViewController {
             user = nil;
             isLoggedIn = false
             eventDataModel.reset()
+            self.tableView.reloadData()
             debug ? print("Logged out") : ()
         } catch let signOutError as NSError {
             print("Error signing out: \(signOutError)")
@@ -288,7 +289,7 @@ class BrowseTableViewController: UITableViewController {
         
         var event = eventDataModel.getPublicEvents()[indexPath.row]
         
-        let bookmarkAction = UIContextualAction(style: .normal, title: "Save Event") { (action, view, completionHandler) in
+        let bookmarkAction = UIContextualAction(style: .normal, title: "") { (action, view, completionHandler) in
             self.eventDataModel.addSavedEventId(id: event.getEventId() ?? "event_id_not_found")
             tableView.reloadRows(at: [indexPath], with: .right) // reload the cell to update the UI
             let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
@@ -305,7 +306,9 @@ class BrowseTableViewController: UITableViewController {
             completionHandler(true)
         }
         bookmarkAction.backgroundColor = .systemGreen
-        let removeAction =  UIContextualAction(style: .normal, title: "Unsave") {
+        bookmarkAction.image = UIImage(systemName: "plus")
+
+        let removeAction =  UIContextualAction(style: .normal, title: "") {
             (action, view, completionHandler) in
             self.eventDataModel.removeSavedEventId(id: event.getEventId() ?? "event_id_not_found")
             tableView.reloadRows(at: [indexPath], with: .right) // reload the cell to update the UI
@@ -323,7 +326,8 @@ class BrowseTableViewController: UITableViewController {
             completionHandler(true)
         }
         removeAction.backgroundColor = .systemRed
-        
+        removeAction.image = UIImage(systemName: "xmark")
+
             
         if eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found") {
             let configuration = UISwipeActionsConfiguration(actions: [removeAction])

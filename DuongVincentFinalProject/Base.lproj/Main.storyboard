@@ -318,13 +318,93 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="g67-al-WlU">
-                                <rect key="frame" x="0.0" y="50" width="375" height="43.5"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="eventCell" rowHeight="100" id="KTr-br-ICy" customClass="EventTableViewCell" customModule="DuongVincentFinalProject" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="50" width="375" height="100"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="g67-al-WlU" id="OsT-qd-rhB">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="KTr-br-ICy" id="sjp-qw-LZz">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="100"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NoImageProvided" translatesAutoresizingMaskIntoConstraints="NO" id="Ik4-G4-7sh">
+                                            <rect key="frame" x="5" y="0.0" width="110" height="100"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="110" id="8s0-Hx-wLn"/>
+                                                <constraint firstAttribute="height" constant="100" id="Zxf-iD-OcD"/>
+                                            </constraints>
+                                        </imageView>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bible Study Session" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Rr3-Pi-xea">
+                                            <rect key="frame" x="120" y="5" width="245" height="25"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="25" id="vno-Qa-8WY"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="19"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="We will discuss the bible." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZMo-KD-eX3">
+                                            <rect key="frame" x="120" y="30" width="229" height="21"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="21" id="NUb-5T-hwq"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="10:00 PM, Tuesday, Aug 2023" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YcY-vY-8qS">
+                                            <rect key="frame" x="120" y="51" width="234" height="21"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="21" id="lEF-ta-acd"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="@ USC Religious Center" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oan-xj-MCK">
+                                            <rect key="frame" x="120" y="72" width="250" height="21"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="21" id="GJp-hd-CuK"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bookmark.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="kI1-tY-KBt">
+                                            <rect key="frame" x="341" y="16" width="23" height="32"/>
+                                            <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="23" id="5Gg-JQ-dum"/>
+                                                <constraint firstAttribute="height" constant="32" id="heY-H0-49d"/>
+                                            </constraints>
+                                        </imageView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="Rr3-Pi-xea" firstAttribute="top" secondItem="sjp-qw-LZz" secondAttribute="top" constant="5" id="32u-Qj-m6s"/>
+                                        <constraint firstItem="kI1-tY-KBt" firstAttribute="trailing" secondItem="sjp-qw-LZz" secondAttribute="trailingMargin" constant="5" id="69R-gO-GKB"/>
+                                        <constraint firstItem="Ik4-G4-7sh" firstAttribute="top" secondItem="sjp-qw-LZz" secondAttribute="top" id="Ark-Vs-sDB"/>
+                                        <constraint firstItem="Ik4-G4-7sh" firstAttribute="leading" secondItem="sjp-qw-LZz" secondAttribute="leading" constant="5" id="HFb-XY-gq1"/>
+                                        <constraint firstItem="oan-xj-MCK" firstAttribute="leading" secondItem="Ik4-G4-7sh" secondAttribute="trailing" constant="5" id="HdA-9t-kli"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="ZMo-KD-eX3" secondAttribute="trailing" constant="10" id="LVD-4s-wuC"/>
+                                        <constraint firstAttribute="trailing" secondItem="Rr3-Pi-xea" secondAttribute="trailing" constant="10" id="MrS-aV-dKn"/>
+                                        <constraint firstItem="ZMo-KD-eX3" firstAttribute="leading" secondItem="Ik4-G4-7sh" secondAttribute="trailing" constant="5" id="Ucu-Ba-Cgz"/>
+                                        <constraint firstItem="kI1-tY-KBt" firstAttribute="top" secondItem="sjp-qw-LZz" secondAttribute="topMargin" constant="5" id="b9I-jo-0fW"/>
+                                        <constraint firstItem="Rr3-Pi-xea" firstAttribute="leading" secondItem="Ik4-G4-7sh" secondAttribute="trailing" constant="5" id="boU-Fw-hM6"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="YcY-vY-8qS" secondAttribute="trailing" constant="5" id="fWN-Cx-Nx7"/>
+                                        <constraint firstItem="YcY-vY-8qS" firstAttribute="top" secondItem="ZMo-KD-eX3" secondAttribute="bottom" id="hTh-3P-hdJ"/>
+                                        <constraint firstItem="ZMo-KD-eX3" firstAttribute="top" secondItem="Rr3-Pi-xea" secondAttribute="bottom" id="kg9-Kx-TD5"/>
+                                        <constraint firstAttribute="trailing" secondItem="oan-xj-MCK" secondAttribute="trailing" constant="5" id="lcb-OM-feu"/>
+                                        <constraint firstAttribute="bottom" secondItem="Ik4-G4-7sh" secondAttribute="bottom" id="rKQ-fW-fT9"/>
+                                        <constraint firstItem="oan-xj-MCK" firstAttribute="top" secondItem="YcY-vY-8qS" secondAttribute="bottom" id="rWY-LX-zSL"/>
+                                        <constraint firstItem="YcY-vY-8qS" firstAttribute="leading" secondItem="Ik4-G4-7sh" secondAttribute="trailing" constant="5" id="wT5-XS-PkN"/>
+                                    </constraints>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="bookmarkIndicator" destination="kI1-tY-KBt" id="7XK-KN-poM"/>
+                                    <outlet property="eventDateTime" destination="YcY-vY-8qS" id="bLz-VR-5lN"/>
+                                    <outlet property="eventDescription" destination="ZMo-KD-eX3" id="EQP-Wg-r5r"/>
+                                    <outlet property="eventLocation" destination="oan-xj-MCK" id="om6-0I-aWC"/>
+                                    <outlet property="eventTitle" destination="Rr3-Pi-xea" id="oGD-Bo-eYF"/>
+                                    <outlet property="thumbnail" destination="Ik4-G4-7sh" id="XHP-BB-s4Q"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -1279,8 +1359,8 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="KgO-Sa-Pdz"/>
-        <segue reference="Fxc-4P-di9"/>
+        <segue reference="zFc-6Z-fPY"/>
+        <segue reference="gNe-ib-6zh"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="NoImageProvided" width="204" height="204"/>
