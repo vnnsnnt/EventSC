@@ -88,8 +88,6 @@ class LoginViewController: UIViewController {
                                 self?.completionHandler?(user);
                             }
                         }
-                        
-                        
                     }
                 }
             }

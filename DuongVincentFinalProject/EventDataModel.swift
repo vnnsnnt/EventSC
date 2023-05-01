@@ -69,4 +69,23 @@ class EventDataModel: NSObject {
     func addSavedEventId(id: String) {
         self.savedEventIds.append(id);
     }
+    
+    func setSavedEventIds(eventIds: [String]) {
+        self.savedEventIds = eventIds
+    }
+    
+    func getSavedEventIds() -> [String] {
+        return self.savedEventIds
+    }
+    
+    func removeSavedEventId(id: String) {
+        self.savedEventIds.removeAll {$0 == id}
+    }
+    
+    func reset() -> Void {
+        self.savedEventIds = []
+        self.savedEvents = []
+        self.hostedEvents = []
+        self.user = nil
+    }
 }

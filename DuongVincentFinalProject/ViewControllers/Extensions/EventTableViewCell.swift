@@ -14,6 +14,7 @@ class EventTableViewCell: UITableViewCell {
     @IBOutlet weak var eventDescription: UILabel!
     @IBOutlet weak var eventDateTime: UILabel!
     @IBOutlet weak var eventLocation: UILabel!
+    @IBOutlet weak var bookmarkIndicator: UIImageView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

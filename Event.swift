@@ -22,8 +22,9 @@ struct Event {
     private var createDate: Date?
     private var likeCount = 0
     private var eventId: String?
+    var savedByCurrentUser = false
 
-    init(title: String? = nil, description: String? = nil, dateTime: String? = nil, locationTitle: String? = nil, locationAddress: String? = nil, place: Place? = nil, user: User? = nil, imageUrl: String? = nil, image: UIImage? = nil, createDate: Date? = nil, likeCount: Int = 0, eventId: String? = nil) {
+    init(title: String? = nil, description: String? = nil, dateTime: String? = nil, locationTitle: String? = nil, locationAddress: String? = nil, place: Place? = nil, user: User? = nil, imageUrl: String? = nil, image: UIImage? = nil, createDate: Date? = nil, likeCount: Int = 0, eventId: String? = nil, savedByCurrentUser: Bool = false) {
         self.title = title
         self.description = description
         self.dateTime = dateTime
@@ -36,6 +37,7 @@ struct Event {
         self.createDate = createDate
         self.likeCount = likeCount
         self.eventId = eventId
+        self.savedByCurrentUser = savedByCurrentUser
     }
     
     

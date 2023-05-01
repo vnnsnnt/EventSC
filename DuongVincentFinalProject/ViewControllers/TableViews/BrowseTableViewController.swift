@@ -52,12 +52,31 @@ class BrowseTableViewController: UITableViewController {
         
         eventDataModel = EventDataModel.sharedInstance
         
+        if let currentUser = eventDataModel.getUser() {
+            let savedEventsRef = database.collection("saved_events").document(currentUser.getEmail() ?? "email_not_found")
+            savedEventsRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    let data = document.data()
+                    if let savedEventIds = data?["saved_event_ids"] as? [String] {
+                        self.eventDataModel.setSavedEventIds(eventIds: savedEventIds)
+                    } else {
+                        print("No saved event IDs found")
+                    }
+                } else {
+                    print("Document does not exist")
+                }
+            }
+        }
+        
         let eventsRef = database.collection("events")
         let query = eventsRef
         query.getDocuments() { (querySnapshot, queryError) in
             if queryError == nil {
                 let documents = querySnapshot!.documents
                 var events = [Event]()
+                
+                let savedEventsId = self.eventDataModel.getSavedEventIds()
+                print(savedEventsId)
                 
                 for document in documents {
                     let data = document.data()
@@ -69,16 +88,23 @@ class BrowseTableViewController: UITableViewController {
                     let email = data["email"] as? String ?? "email_not_found"
                     let name = data["name"] as? String ?? "name_not_found"
                     let eventId = data["event-id"] as? String ?? "event_id_not_found"
-                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId)
+                    var isSaved = false
+                    if savedEventsId.contains(eventId) {
+                        isSaved = true
+                    }
+                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId, savedByCurrentUser: isSaved)
                     events.append(event)
                 }
                 
                 !events.isEmpty ? self.eventDataModel.setPublicEvents(events: events) : ()
+                self.tableView.reloadData()
+
             }
         }
         
+        
+        
         isLoggedIn = false
-        self.tableView.reloadData()
 
     }
     
@@ -87,6 +113,56 @@ class BrowseTableViewController: UITableViewController {
         if eventDataModel.getUser() != nil {
             isLoggedIn = true
         }
+        
+        if let currentUser = eventDataModel.getUser() {
+            let savedEventsRef = database.collection("saved_events").document(currentUser.getEmail() ?? "email_not_found")
+            savedEventsRef.getDocument { (document, error) in
+                if let document = document, document.exists {
+                    let data = document.data()
+                    if let savedEventIds = data?["saved_event_ids"] as? [String] {
+                        self.eventDataModel.setSavedEventIds(eventIds: savedEventIds)
+                    } else {
+                        print("No saved event IDs found")
+                    }
+                } else {
+                    print("Document does not exist")
+                }
+            }
+        }
+        
+        let eventsRef = database.collection("events")
+        let query = eventsRef
+        query.getDocuments() { (querySnapshot, queryError) in
+            if queryError == nil {
+                let documents = querySnapshot!.documents
+                var events = [Event]()
+                
+                let savedEventsId = self.eventDataModel.getSavedEventIds()
+                print(savedEventsId)
+                
+                for document in documents {
+                    let data = document.data()
+                    let title = data["title"] as? String ?? "title_not_found"
+                    let description = data["description"] as? String ?? "description_not_found"
+                    let locationTitle = data["locationTitle"] as? String ?? "location_title_not_found"
+                    let locationAddress = data["locationAddress"] as? String ?? "location_address_not_found"
+                    let imageUrl = data["imageUrl"] as? String ?? "image_not_found"
+                    let email = data["email"] as? String ?? "email_not_found"
+                    let name = data["name"] as? String ?? "name_not_found"
+                    let eventId = data["event-id"] as? String ?? "event_id_not_found"
+                    var isSaved = false
+                    if savedEventsId.contains(eventId) {
+                        isSaved = true
+                    }
+                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId, savedByCurrentUser: isSaved)
+                    events.append(event)
+                }
+                
+                !events.isEmpty ? self.eventDataModel.setPublicEvents(events: events) : ()
+                self.tableView.reloadData()
+            }
+        }
+        
         self.tableView.reloadData()
     }
 
@@ -109,6 +185,56 @@ class BrowseTableViewController: UITableViewController {
                     self.user = user
                     self.eventDataModel.setUser(user: user)
                     self.isLoggedIn = true
+                    
+                    if let currentUser = self.eventDataModel.getUser() {
+                        let savedEventsRef = self.database.collection("saved_events").document(currentUser.getEmail() ?? "email_not_found")
+                        savedEventsRef.getDocument { (document, error) in
+                            if let document = document, document.exists {
+                                let data = document.data()
+                                if let savedEventIds = data?["saved_event_ids"] as? [String] {
+                                    self.eventDataModel.setSavedEventIds(eventIds: savedEventIds)
+                                } else {
+                                    print("No saved event IDs found")
+                                }
+                            } else {
+                                print("Document does not exist")
+                            }
+                        }
+                    }
+                    
+                    let eventsRef = self.database.collection("events")
+                    let query = eventsRef
+                    query.getDocuments() { (querySnapshot, queryError) in
+                        if queryError == nil {
+                            let documents = querySnapshot!.documents
+                            var events = [Event]()
+                            
+                            let savedEventsId = self.eventDataModel.getSavedEventIds()
+                            print(savedEventsId)
+                            
+                            for document in documents {
+                                let data = document.data()
+                                let title = data["title"] as? String ?? "title_not_found"
+                                let description = data["description"] as? String ?? "description_not_found"
+                                let locationTitle = data["locationTitle"] as? String ?? "location_title_not_found"
+                                let locationAddress = data["locationAddress"] as? String ?? "location_address_not_found"
+                                let imageUrl = data["imageUrl"] as? String ?? "image_not_found"
+                                let email = data["email"] as? String ?? "email_not_found"
+                                let name = data["name"] as? String ?? "name_not_found"
+                                let eventId = data["event-id"] as? String ?? "event_id_not_found"
+                                var isSaved = false
+                                if savedEventsId.contains(eventId) {
+                                    isSaved = true
+                                }
+                                let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId, savedByCurrentUser: isSaved)
+                                events.append(event)
+                            }
+                            
+                            !events.isEmpty ? self.eventDataModel.setPublicEvents(events: events) : ()
+                            self.tableView.reloadData()
+
+                        }
+                    }
                 }
                 
                 self.dismiss(animated: true, completion: nil)
@@ -132,7 +258,7 @@ class BrowseTableViewController: UITableViewController {
             try Auth.auth().signOut()
             user = nil;
             isLoggedIn = false
-            eventDataModel.setUser(user: nil)
+            eventDataModel.reset()
             debug ? print("Logged out") : ()
         } catch let signOutError as NSError {
             print("Error signing out: \(signOutError)")
@@ -146,6 +272,7 @@ class BrowseTableViewController: UITableViewController {
         cell.eventDescription.text = event.getDescription()
         cell.eventDateTime.text = "10:00 PM, Tuesday, Aug 2023"
         cell.eventLocation.text = "@ " + event.getLocationTitle()!
+        cell.bookmarkIndicator.isHidden = (eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found")) ? false : true
         let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
         cell.thumbnail.kf.setImage(with: url)
         return cell
@@ -159,31 +286,63 @@ class BrowseTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
-        let event = eventDataModel.getPublicEvents()[indexPath.row]
+        var event = eventDataModel.getPublicEvents()[indexPath.row]
         
         let bookmarkAction = UIContextualAction(style: .normal, title: "Save Event") { (action, view, completionHandler) in
-            // Perform edit action here
+            self.eventDataModel.addSavedEventId(id: event.getEventId() ?? "event_id_not_found")
+            tableView.reloadRows(at: [indexPath], with: .right) // reload the cell to update the UI
+            let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+            
+            savedEventsRef.setData ([
+                "saved_event_ids": self.eventDataModel.getSavedEventIds()
+            ]) { err in
+                if let err = err {
+                    print("Error adding saved event: \(err)")
+                } else {
+                    print("Saved event added successfully")
+                }
+            }
             completionHandler(true)
         }
         bookmarkAction.backgroundColor = .systemGreen
         let removeAction =  UIContextualAction(style: .normal, title: "Unsave") {
             (action, view, completionHandler) in
+            self.eventDataModel.removeSavedEventId(id: event.getEventId() ?? "event_id_not_found")
+            tableView.reloadRows(at: [indexPath], with: .right) // reload the cell to update the UI
+            let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+            
+            savedEventsRef.setData ([
+                "saved_event_ids": self.eventDataModel.getSavedEventIds()
+            ]) { err in
+                if let err = err {
+                    print("Error adding saved event: \(err)")
+                } else {
+                    print("Saved event added successfully")
+                }
+            }
             completionHandler(true)
         }
         removeAction.backgroundColor = .systemRed
         
-//        let configuration = UISwipeActionsConfiguration(actions: [bookmarkAction])
-        let configuration = UISwipeActionsConfiguration(actions: [removeAction])
-        return configuration
+            
+        if eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found") {
+            let configuration = UISwipeActionsConfiguration(actions: [removeAction])
+            return configuration
+
+        } else {
+            let configuration = UISwipeActionsConfiguration(actions: [bookmarkAction])
+            return configuration
+        }
     }
 
-    /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return true
+        if eventDataModel.getUser() != nil {
+            return true
+        }
+        return false
     }
-    */
 
     /*
     // Override to support editing the table view.

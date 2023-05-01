@@ -68,8 +68,8 @@ class HostedEventsTableViewController: UITableViewController {
                                 if downloadUrlError == nil, let imageUrl = url?.absoluteString {
                                     let eventRef = self.database.collection("events").document()
                                     let eventData : [String: Any] = [
-                                        "email": self.user?.getEmail() ?? "email_not_found",
-                                        "name": self.user?.getName() ?? "name_not_found",
+                                        "email": self.eventDataModel.getUser()?.getEmail() ?? "email_not_found",
+                                        "name": self.eventDataModel.getUser()?.getName() ?? "name_not_found",
                                         "title": event.getTitle() ?? "title_not_found",
                                         "description": event.getDescription() ?? "description_not_found",
                                         "locationTitle": event.getLocationTitle() ?? "location_title_not_found",
