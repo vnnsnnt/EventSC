@@ -29,11 +29,30 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
         searchCompleter.delegate = self
         searchCompleter.resultTypes = .address
         
+        eventTitle.delegate = self
+        eventDescription.delegate = self
+        eventLocation.delegate = self
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
+               view.addGestureRecognizer(tap)
+        
         // Set up the text field for autocompletion
         eventLocation.delegate = self
         eventLocation.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
+    
+    //handles keyboard gestures
+    @objc func dismissKeyboard() {
+          view.endEditing(true)
+      }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        return false
+    }
+    
+    // handles the completion of the segue and returns the data back to host event page
     @IBAction func savePressed(_sender: UIButton) {
         if let title = eventTitle.text, !title.isEmpty,
            let description = eventDescription.text, !description.isEmpty,
@@ -44,6 +63,7 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
         }
     }
     
+    // handles the image uploading process
     @IBAction func uploadImageButtonPressed(_sender: UIButton) {
         let imagePicker = UIImagePickerController()
             imagePicker.sourceType = .photoLibrary
@@ -52,6 +72,7 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
         
     }
     
+    //allows image to be previed when selected
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true, completion: nil)
 
@@ -60,10 +81,12 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
         }
     }
     
+    //cancel create event
     @IBAction func cancelPressed(_sender: UIButton) {
         self.completionHandler?(nil)
     }
     
+    // hanldes the segue to find a specific address
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "addAddressView" {
             let addAddressView = segue.destination as! AddAddressViewController

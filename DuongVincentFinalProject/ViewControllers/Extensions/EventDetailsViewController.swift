@@ -33,6 +33,7 @@ class EventDetailsViewController: UIViewController {
     @IBOutlet weak var weatherConditionsLabel: UILabel!
     @IBOutlet weak var bookmarkButton: UIButton!
     
+    //images used
     let emptyBellImage = UIImage(systemName: "bell")?.withRenderingMode(.alwaysTemplate)
     let filledBellImage = UIImage(systemName: "bell.fill")?.withRenderingMode(.alwaysTemplate)
     let emptyHeart = UIImage(systemName: "heart")?.withRenderingMode(.alwaysTemplate)
@@ -51,28 +52,35 @@ class EventDetailsViewController: UIViewController {
         let emptyHeart = UIImage(systemName: "heart")?.withRenderingMode(.alwaysTemplate)
         likeBUtton.setImage(emptyHeart, for: .normal)
 
-        
 
     }
     
+    // will take the data passed in from the segue to display extra details of the event
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance
         if let event {
             let eventDataModel = EventDataModel.sharedInstance
+            
+            //check if the user already has set reminder for event
             if eventDataModel.remindedEventIds.contains(event.getEventId() ?? "event_id_not_found") {
                 addReminderButton.image = filledBellImage
             } else {
                 addReminderButton.image = emptyBellImage
             }
             
+            // get the like count of the event
             self.getLikeCount()
             
+            
+            // check if the user has already liked the event
             if eventDataModel.likedEventIds.contains(event.getEventId() ?? "event_id_not_found") {
                 likeBUtton.setImage(filledHeart, for: .normal)
             } else {
                 likeBUtton.setImage(emptyHeart, for: .normal)
             }
             
+            
+            // check if the user has already saved the event
             if eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found") {
                 bookmarkButton.setImage(filledBook, for: .normal)
             } else {
@@ -80,6 +88,7 @@ class EventDetailsViewController: UIViewController {
             }
             
             
+            // set the labels and text for each of the outlets
             eventTitle.text = event.getTitle()
             eventHoster.text = "by \(event.getUser()?.getName() ?? "Unknown Name")"
             eventDescription.text = event.getDescription()
@@ -95,6 +104,7 @@ class EventDetailsViewController: UIViewController {
             let location = "\(event.getLocationAddress() ?? "No Address Found")"
             let locationEncoded = location.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
             
+            //this date formatter is used format the date for the api call to weatherapi
             let dateFormatter2 = DateFormatter()
             dateFormatter2.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
             let dateString = dateFormatter2.string(from: event.getDate() ?? Date())
@@ -111,19 +121,18 @@ class EventDetailsViewController: UIViewController {
                 }
                
                // Parse the response JSON to extract the forecasted temperature and condition
-                
                 do {
                     let json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-                    let forecast = json["forecast"] as! [String: Any]
-                    let forecastday = forecast["forecastday"] as! [[String: Any]]
-                    guard let forecastday = forecast["forecastday"] as? [[String: Any]], !forecastday.isEmpty else {
+                    let forecast = json["forecast"] as? [String: Any]
+                    guard let forecastday = forecast?["forecastday"] as? [[String: Any]], !forecastday.isEmpty else {
                         // Handle the case where forecastday is empty or not an array
                         DispatchQueue.main.async {
                             self.weatherConditionsLabel.text = "Unable to fetch weather data."
                         }
                         return
                     }
-
+                    
+                    // the data that we will display for the temperature and weather
                     let hour = forecastday[0]["hour"] as! [[String: Any]]
                     let tempF = hour[0]["temp_f"] as! Double
                     let condition = hour[0]["condition"] as! [String: Any]
@@ -146,11 +155,12 @@ class EventDetailsViewController: UIViewController {
     }
     
     
-    
+    // handle the processing for when the user clicks the like button
     @IBAction func likeClicked(_sender: UIButton) {
         let emptyHeart = UIImage(systemName: "heart")?.withRenderingMode(.alwaysTemplate)
         let filledHeart = UIImage(systemName: "heart.fill")?.withRenderingMode(.alwaysTemplate)
 
+        //checks if the user already has liked the event or not
         if(eventDataModel.likedEventIds.contains(event?.getEventId() ?? "event_id_not_found")) {
             eventDataModel.likedEventIds.removeAll {$0 == event?.getEventId()}
             _sender.setImage(emptyHeart, for: .normal)
@@ -159,6 +169,8 @@ class EventDetailsViewController: UIViewController {
             _sender.setImage(filledHeart, for: .normal)
         }
         
+        
+        // saves the new status of the users liked events to firestore
         let likedEventRefs = database.collection("liked_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
         
         likedEventRefs.setData([
@@ -170,9 +182,12 @@ class EventDetailsViewController: UIViewController {
                 print("Liked event added successfully")
             }
         }
+        
+        //refreshes the like count
         self.getLikeCount()
     }
     
+    //handles the process to display the map segue
     @IBAction func mapPressed(_sender: UIButton) {
         if let event {
             place = Place(title: event.getLocationTitle(), address: event.getLocationAddress())
@@ -180,17 +195,17 @@ class EventDetailsViewController: UIViewController {
         }
     }
     
-    @IBAction func shareClicked(_sender: UIButton) {
-        
-    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        // segue that passes the location of the event to the map view controller to display
         if segue.identifier == "showMapView" {
             let mapViewController = segue.destination as! MapViewController
             mapViewController.place = place
         }
     }
     
+    // handles the event where the user clicks on the notification bell
     @IBAction func addReminderButtonPressed(_ sender: UIButton) {
         let eventStore = EKEventStore()
         
@@ -221,6 +236,7 @@ class EventDetailsViewController: UIViewController {
         }
     }
 
+    // this will create a reminder for the event on the users reminder app
     func createReminder(in eventStore: EKEventStore) {
         if self.eventDataModel.remindedEventIds.contains(self.event?.getEventId() ?? "event_id_not_found") {
             self.removeReminder(eventStore: eventStore, calendarItemIdentifier: self.eventDataModel.remindedEventsDictionary[self.event?.getEventId() ?? "event_id_not_found"] ?? "item_identifier_not_found")
@@ -262,6 +278,8 @@ class EventDetailsViewController: UIViewController {
         }
     }
     
+    
+    // this will remove the event from the user's reminders app
     func removeReminder(eventStore: EKEventStore, calendarItemIdentifier: String) {
         // Fetch the reminder with the given calendar item identifier
         let reminder = eventStore.calendarItem(withIdentifier: calendarItemIdentifier) as? EKReminder
@@ -297,16 +315,26 @@ class EventDetailsViewController: UIViewController {
             // Present the alert to the user
             present(alertController, animated: true, completion: nil)
         } else {
+            
+            self.eventDataModel.remindedEventsDictionary.removeValue(forKey: self.event?.getEventId() ?? "event_id_not_found")
+            let reminderEventRefs = self.database.collection("reminded_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+            
+            reminderEventRefs.setData(self.eventDataModel.remindedEventsDictionary) { err in
+                if let err = err {
+                    print("Error adding reminder: \(err)")
+                } else {
+                    print("Reminder added successfuly")
+                }
+            }
+            self.addReminderButton.image = self.emptyBellImage
+
             print("Reminder with identifier \(calendarItemIdentifier) not found.")
         }
     }
 
 
-
-
-    
+    // this will save or unsave the event from the users saved events
     @IBAction func bookmarkButtonPressed(_sender: UIButton) {
-        
         if eventDataModel.getSavedEventIds().contains(event?.getEventId() ?? "event_id_not_found") {
             eventDataModel.removeSavedEventId(id: event?.getEventId() ?? "event_id_not_found")
             print(eventDataModel.getSavedEventIds().contains(event?.getEventId() ?? "event_id_not_found"))
@@ -329,6 +357,8 @@ class EventDetailsViewController: UIViewController {
         }
     }
     
+    
+    //this will increment all users who have liked the event and return the total count
     func getLikeCount() -> Void {
         let eventIdToCount = event?.getEventId() ?? "event_id_not_found"
 

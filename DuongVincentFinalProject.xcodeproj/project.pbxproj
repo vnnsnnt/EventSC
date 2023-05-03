@@ -27,7 +27,6 @@
 		87A687C629FDF9280018563A /* EventDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A687C529FDF9280018563A /* EventDetailsViewController.swift */; };
 		87AB7FCE29FEFE0B0093418B /* AddAddressViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AB7FCD29FEFE0B0093418B /* AddAddressViewController.swift */; };
 		87AB7FD029FF03770093418B /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AB7FCF29FF03770093418B /* Place.swift */; };
-		87AB7FD22A0060910093418B /* ForecastData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AB7FD12A0060910093418B /* ForecastData.swift */; };
 		87C4939229FB2306003FCEA2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4939129FB2306003FCEA2 /* AppDelegate.swift */; };
 		87C4939429FB2306003FCEA2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4939329FB2306003FCEA2 /* SceneDelegate.swift */; };
 		87C4939629FB2306003FCEA2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4939529FB2306003FCEA2 /* ViewController.swift */; };
@@ -87,7 +86,6 @@
 		87A687C529FDF9280018563A /* EventDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailsViewController.swift; sourceTree = "<group>"; };
 		87AB7FCD29FEFE0B0093418B /* AddAddressViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAddressViewController.swift; sourceTree = "<group>"; };
 		87AB7FCF29FF03770093418B /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
-		87AB7FD12A0060910093418B /* ForecastData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastData.swift; sourceTree = "<group>"; };
 		87C4938E29FB2306003FCEA2 /* DuongVincentFinalProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuongVincentFinalProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87C4939129FB2306003FCEA2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		87C4939329FB2306003FCEA2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -140,6 +138,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		87092EC22A0311B8001F3DE0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				87AB7FCF29FF03770093418B /* Place.swift */,
+				87D310F029FC7C9B00E55FA8 /* User.swift */,
+				87DACAFC29FC5C83006D0D3F /* Event.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		8721DDD029FDA8FF00D458FA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -172,10 +180,7 @@
 		87C4938529FB2306003FCEA2 = {
 			isa = PBXGroup;
 			children = (
-				87AB7FD12A0060910093418B /* ForecastData.swift */,
-				87AB7FCF29FF03770093418B /* Place.swift */,
-				87D310F029FC7C9B00E55FA8 /* User.swift */,
-				87DACAFC29FC5C83006D0D3F /* Event.swift */,
+				87092EC22A0311B8001F3DE0 /* Models */,
 				87C4939029FB2306003FCEA2 /* DuongVincentFinalProject */,
 				87C493AA29FB2308003FCEA2 /* DuongVincentFinalProjectTests */,
 				87C493B429FB2308003FCEA2 /* DuongVincentFinalProjectUITests */,
@@ -405,7 +410,6 @@
 				87DACB0529FC5F55006D0D3F /* EventDataModel.swift in Sources */,
 				87C4939C29FB2306003FCEA2 /* DuongVincentFinalProject.xcdatamodeld in Sources */,
 				87AB7FCE29FEFE0B0093418B /* AddAddressViewController.swift in Sources */,
-				87AB7FD22A0060910093418B /* ForecastData.swift in Sources */,
 				87D310F129FC7C9B00E55FA8 /* User.swift in Sources */,
 				87DACAFD29FC5C83006D0D3F /* Event.swift in Sources */,
 				87D310FB29FC966E00E55FA8 /* LoginViewController.swift in Sources */,

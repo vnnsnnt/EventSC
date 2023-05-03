@@ -23,6 +23,8 @@ class BrowseTableViewController: UITableViewController {
     private var user: User?
     private var eventDataModel: EventDataModel!
     
+    
+    // log state tracker and updater
     var isLoggedIn = false {
         didSet {
             if isLoggedIn {
@@ -42,26 +44,17 @@ class BrowseTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-    
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
         
+        // pull down to refresh page
         let refreshControl = UIRefreshControl()
         tableView.addSubview(refreshControl)
-        
         refreshControl.addTarget(self, action: #selector(refreshTable(_:)), for: .valueChanged)
 
     
     }
     
+    // function call to refresh the page
     @objc func refreshTable(_ sender: UIRefreshControl) {
-        // Fetch the new data here...
-        // For example, you could make a network request to get the latest data.
-
-        // Once you have the new data, reload the table view and end the refreshing animation.
         self.getPublicEvents()
         tableView.reloadData()
         sender.endRefreshing()
@@ -74,6 +67,8 @@ class BrowseTableViewController: UITableViewController {
             isLoggedIn = false
             self.getPublicEvents()
         } else {
+            
+            // if user is logged in get public events with attributes like bookmarked / liked
             database.collection("users").document(user?.email ?? "no_email_found").getDocument { (document, error) in
                 if let document = document, document.exists {
                     let data = document.data()
@@ -87,14 +82,18 @@ class BrowseTableViewController: UITableViewController {
         }
     }
 
-    // MARK: - Table view data source
 
+    // returns the amount of rows to draw
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return eventDataModel.getPublicEvents().count;
     }
     
+    
+    //segue handler
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        //login segue handler
         if segue.identifier == "showLoginView" {
             debug ? print("Showing login view as modal") : ()
             let loginView = segue.destination as! LoginViewController
@@ -113,6 +112,7 @@ class BrowseTableViewController: UITableViewController {
             }
         }
         
+        // show details view segue hanlder, passes in the event data to display bigger
         if segue.identifier == "showDetailsView" {
             // Get the destination view controller
             let destinationVC = segue.destination as! EventDetailsViewController
@@ -126,25 +126,35 @@ class BrowseTableViewController: UITableViewController {
     }
     
     
+    // handles log out of the application, resets the datamodel
     @IBAction func logoutPressed(_sender: UIButton) {
-        do {
-            try Auth.auth().signOut()
-            user = nil;
-            isLoggedIn = false
-            eventDataModel.reset()
-            self.tableView.reloadData()
-            debug ? print("Logged out") : ()
-        } catch let signOutError as NSError {
-            print("Error signing out: \(signOutError)")
+        let alertController = UIAlertController(title: "Are you sure you want to log out of \(self.eventDataModel.getUser()?.getName() ?? "Name_not_found")?", message: nil, preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let okAction = UIAlertAction(title: "OK", style: .default) { (_) in
+            do {
+                try Auth.auth().signOut()
+                self.user = nil;
+                self.isLoggedIn = false
+                self.eventDataModel.reset()
+                self.tableView.reloadData()
+            } catch let signOutError as NSError {
+                print("Error signing out: \(signOutError)")
+            }
         }
+        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
     }
+
     
+    // default height size of 300 for each row
     override func tableView(_ tableView: UITableView,
                heightForRowAt indexPath: IndexPath) -> CGFloat {
-       // Use the default size for all other rows.
         return 300
     }
 
+    
+    // draws each cell with event description and title and other attributes
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let event = eventDataModel.getPublicEvents()[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "eventCell", for: indexPath) as! EventTableViewCell
@@ -158,16 +168,19 @@ class BrowseTableViewController: UITableViewController {
         return cell
     }
     
+    // show the detailed view of the event when row is selected
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedEvent = eventDataModel.getPublicEvents()[indexPath.row]
         performSegue(withIdentifier: "showDetailsView", sender: selectedEvent)
     }
     
     
+    // allow for swipe actions to bookmark and unbookmark events
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         let event = eventDataModel.getPublicEvents()[indexPath.row]
         
+        // handles saving events when using swipe function
         let bookmarkAction = UIContextualAction(style: .normal, title: "") { (action, view, completionHandler) in
             self.eventDataModel.addSavedEventId(id: event.getEventId() ?? "event_id_not_found")
             tableView.reloadRows(at: [indexPath], with: .right) // reload the cell to update the UI
@@ -187,6 +200,7 @@ class BrowseTableViewController: UITableViewController {
         bookmarkAction.backgroundColor = .systemGreen
         bookmarkAction.image = UIImage(systemName: "bookmark.fill")
 
+        //handles removing event when using swipe function
         let removeAction =  UIContextualAction(style: .normal, title: "") {
             (action, view, completionHandler) in
             self.eventDataModel.removeSavedEventId(id: event.getEventId() ?? "event_id_not_found")
@@ -207,7 +221,7 @@ class BrowseTableViewController: UITableViewController {
         removeAction.backgroundColor = .systemRed
         removeAction.image = UIImage(systemName: "bookmark")
 
-            
+        // decides whether or not to show save option or delete option
         if eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found") {
             let configuration = UISwipeActionsConfiguration(actions: [removeAction])
             return configuration
@@ -220,13 +234,13 @@ class BrowseTableViewController: UITableViewController {
 
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
         if eventDataModel.getUser() != nil {
             return true
         }
         return false
     }
 
+    // fetches all events from firestore and sets it to public events [Events]
     func getPublicEvents() -> Void {
         
         let user = eventDataModel.getUser()
@@ -275,6 +289,7 @@ class BrowseTableViewController: UITableViewController {
 
     }
     
+    // second part of the query 
     func queryPublicEvents() -> Void {
         let eventsRef = database.collection("events")
         let query = eventsRef
@@ -310,7 +325,7 @@ class BrowseTableViewController: UITableViewController {
                 }
                 
                 let sortedEvents = events.sorted { (event1, event2) -> Bool in
-                    return event1.getDate()?.compare(event2.getDate() ?? Date()) == .orderedDescending
+                    return event1.getCreationDate()?.compare(event2.getCreationDate() ?? Date()) == .orderedDescending
                 }
                 
                 !sortedEvents.isEmpty ? self.eventDataModel.setPublicEvents(events: sortedEvents) : ()

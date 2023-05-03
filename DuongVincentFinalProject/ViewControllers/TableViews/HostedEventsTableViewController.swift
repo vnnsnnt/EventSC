@@ -26,13 +26,9 @@ class HostedEventsTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
     
+    // will get all the users hosted events
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance;
         let user = Auth.auth().currentUser;
@@ -53,22 +49,28 @@ class HostedEventsTableViewController: UITableViewController {
         }
     }
     
+    // set the number of rows to be displayed to how many events the user is hosting
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
         return eventDataModel.getHostedEvents().count;
     }
     
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // processes the completion handler of adding an event
+        // has the added event data to save to the firestore
         if segue.identifier == "showAddEventView" {
             let addView = segue.destination as! AddEventViewController
             addView.completionHandler = {(event: Event?) in
                 if let event, let imageData = event.getImage()!.jpegData(compressionQuality: 0.5) {
                     
+                    //stores the image to firedatabase
                     let imageRef = self.storage.reference().child("images/\(UUID().uuidString).jpg")
                     let metadata = StorageMetadata()
                     metadata.contentType = "image/jpeg"
                     
                     imageRef.putData(imageData, metadata: metadata) { (metadata, insertDataError) in
+                        
+                        // stores text data in firestore
                         if insertDataError == nil {
                             imageRef.downloadURL { (url, downloadUrlError) in
                                 if downloadUrlError == nil, let imageUrl = url?.absoluteString {
@@ -85,11 +87,17 @@ class HostedEventsTableViewController: UITableViewController {
                                         "date": Timestamp(date: event.getDate() ?? Date()),
                                         "creation-date": Timestamp(date: Date())
                                     ]
+                                    
+                                    // add the new event to the current datasource and sort it
                                     eventRef.setData(eventData)
                                     var newEvent = event
                                     newEvent.setImageUrl(url: imageUrl)
                                     newEvent.setUser(user: self.eventDataModel.getUser())
                                     self.eventDataModel.addHostedEvent(event: newEvent)
+                                    let sortedEvents = self.eventDataModel.getHostedEvents().sorted { (event1, event2) -> Bool in
+                                        return event1.getCreationDate()?.compare(event2.getCreationDate() ?? Date()) == .orderedDescending
+                                    }
+                                    self.eventDataModel.setHostedEvents(events: sortedEvents)
                                     self.tableView.reloadData()
                                 }
                             }
@@ -101,6 +109,7 @@ class HostedEventsTableViewController: UITableViewController {
             }
         }
         
+        // handles the login completion
         if segue.identifier == "showLoginView" {
             let loginView = segue.destination as! LoginViewController
             loginView.completionHandler = { [self](user: User?) in
@@ -117,6 +126,7 @@ class HostedEventsTableViewController: UITableViewController {
             }
         }
         
+        // handles the show detailed view
         if segue.identifier == "showDetailsView" {
             // Get the destination view controller
             let destinationVC = segue.destination as! EventDetailsViewController
@@ -129,6 +139,7 @@ class HostedEventsTableViewController: UITableViewController {
     }
     
     
+    //draw the cell with the event details and attributes
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let event = eventDataModel.getHostedEvents()[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "eventCell", for: indexPath) as! EventTableViewCell
@@ -138,24 +149,25 @@ class HostedEventsTableViewController: UITableViewController {
         dateFormatter.dateFormat = "hh:mm a MM/dd/yy"
         let dateTimeString = dateFormatter.string(from: event.getDate() ?? Date())
         cell.eventDateTime.text = dateTimeString
-        cell.eventLocation.text = "@ " + event.getLocationTitle()!
+        cell.eventLocation.text = "@ " + (event.getLocationTitle() ?? "Location Title Unavailable")
         let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
         cell.thumbnail.kf.setImage(with: url)
         return cell
     }
     
+    // Use the default size of 100 for all rows
     override func tableView(_ tableView: UITableView,
                heightForRowAt indexPath: IndexPath) -> CGFloat {
-       // Use the default size for all other rows.
         return 100
     }
 
+    
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
         return true
     }
     
+    //show the detail viewed when an event cell is selected
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedEvent = eventDataModel.getHostedEvents()[indexPath.row]
         performSegue(withIdentifier: "showDetailsView", sender: selectedEvent)
@@ -202,36 +214,14 @@ class HostedEventsTableViewController: UITableViewController {
     }
 
 
+    // use the edit button to start editing process
     @IBAction func editButtonPressed(_sender: UIBarButtonItem) {
         self.tableView.isEditing = !self.tableView.isEditing;
         tableView.reloadData()
         
     }
 
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+    // queries firestore to get all hosted events for the user and sets it to the datasource
     func getHostedEvents() -> Void {
         let user = eventDataModel.getUser()
         let eventsRef = database.collection("events")
@@ -286,7 +276,7 @@ class HostedEventsTableViewController: UITableViewController {
                 }
                 
                 let sortedEvents = events.sorted { (event1, event2) -> Bool in
-                    return event1.getDate()?.compare(event2.getDate() ?? Date()) == .orderedDescending
+                    return event1.getDate()?.compare(event2.getCreationDate() ?? Date()) == .orderedDescending
                 }
                 
                 !sortedEvents.isEmpty ? self.eventDataModel.setHostedEvents(events: sortedEvents) : ()

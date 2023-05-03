@@ -37,6 +37,7 @@ class SavedEventsTableViewController: UITableViewController {
             debug ? print("Not logged in") : ()
             performSegue(withIdentifier: "showLoginView", sender: nil)
         } else {
+            // query firestore to get the users saved event ids
             database.collection("users").document(user?.email ?? "no_email_found").getDocument { (document, error) in
                 if let document = document, document.exists {
                     let data = document.data()
@@ -48,20 +49,18 @@ class SavedEventsTableViewController: UITableViewController {
             }
         }
     }
-    // MARK: - Table view data source
 
-//    override func numberOfSections(in tableView: UITableView) -> Int {
-//        // #warning Incomplete implementation, return the number of sections
-//        return 0
-//    }
-
+    
+    //set the number of rows to display equal to the number of saved events the user has
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
         return eventDataModel.getSavedEvents().count
     }
 
     
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        // handles the login action completion
         if segue.identifier == "showLoginView" {
             let loginView = segue.destination as! LoginViewController
             loginView.completionHandler = {(user: User?) in
@@ -69,6 +68,7 @@ class SavedEventsTableViewController: UITableViewController {
                     self.eventDataModel.setUser(user: user)
                     self.getSavedEvents()
                 } else {
+                    //redirects the user if they do not login
                     if let tabBarController = self.tabBarController {
                         tabBarController.selectedIndex = 0
                         self.debug ? print("Moved to public lists page since not authenticated") : ()
@@ -77,23 +77,23 @@ class SavedEventsTableViewController: UITableViewController {
                 self.dismiss(animated: true, completion: nil)
             }
         }
+        
+        // Pass the selected event to the destination view controller
         if segue.identifier == "showDetailsView" {
-            // Get the destination view controller
             let destinationVC = segue.destination as! EventDetailsViewController
             destinationVC.hidesBottomBarWhenPushed = true
 
-            // Pass the selected event to the destination view controller
             let selectedEvent = sender as! Event
             destinationVC.event = selectedEvent
             
         }
     }
     
+    // set the text data of the cell as well as whether or not the event has a reminder for it
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let event = eventDataModel.getSavedEvents()[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "eventCell", for: indexPath) as! EventTableViewCell
         cell.eventTitle.text = event.getTitle();
-//        cell.eventDescription.text = event.getDescription()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "hh:mm a MM/dd/yy"
         let dateTimeString = dateFormatter.string(from: event.getDate() ?? Date())
@@ -101,25 +101,26 @@ class SavedEventsTableViewController: UITableViewController {
         cell.eventLocation.text = "\(event.getLocationTitle() ?? "No Location Title"), \(event.getLocationAddress() ?? "No Location Address")"
         
         cell.notificationIndicator.isHidden = (eventDataModel.remindedEventIds.contains(event.getEventId() ?? "event_id_not_found")) ? false : true
-        
-//        cell.bookmarkIndicator.isHidden = (eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found")) ? false : true
+    
         let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
         cell.thumbnail.kf.setImage(with: url)
         return cell
     }
     
+    // this will handle the action to show the segue when the user clicks on event
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedEvent = eventDataModel.getSavedEvents()[indexPath.row]
         performSegue(withIdentifier: "showDetailsView", sender: selectedEvent)
     }
     
+    // Use the default size of 140 for all rows in saved events page
     override func tableView(_ tableView: UITableView,
                heightForRowAt indexPath: IndexPath) -> CGFloat {
-       // Use the default size for all other rows.
         return 140
     }
 
     
+    // swipe actions for the table view to remove saved events
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let event = eventDataModel.getSavedEvents()[indexPath.row]
         let removeAction =  UIContextualAction(style: .normal, title: "") {
@@ -147,6 +148,7 @@ class SavedEventsTableViewController: UITableViewController {
             return configuration
     }
    
+    // query firestore to get the users saved events to populate the data model
     func getSavedEvents() -> Void {
         let user = eventDataModel.getUser()
         let savedEventsRef = self.database.collection("saved_events").document(user?.getEmail() ?? "email_not_found")
@@ -180,7 +182,7 @@ class SavedEventsTableViewController: UITableViewController {
                                     }
                                     
                                     let sortedEvents = events.sorted { (event1, event2) -> Bool in
-                                        return event1.getDate()?.compare(event2.getDate() ?? Date()) == .orderedDescending
+                                        return event1.getDate()?.compare(event2.getDate() ?? Date()) == .orderedAscending
                                     }
                                     
                                     self.eventDataModel.setSavedEvents(events: sortedEvents)

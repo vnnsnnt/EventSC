@@ -9,7 +9,7 @@ import UIKit
 import FirebaseAuth
 import FirebaseFirestore
 
-class RegisterViewController: UIViewController {
+class RegisterViewController: UIViewController, UITextFieldDelegate {
     
     var debug = true;
     
@@ -22,6 +22,7 @@ class RegisterViewController: UIViewController {
     @IBOutlet weak var email: UITextField!
     @IBOutlet weak var initialPassword: UITextField!
     @IBOutlet weak var confirmPassword: UITextField!
+    @IBOutlet weak var errorLabel: UILabel!
     
     //processing variables
     private var eventDataModel: EventDataModel!
@@ -33,7 +34,6 @@ class RegisterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
             
-        // Do any additional setup after loading the view.
 
         debug ? print("Loading Register Page") : ()
         
@@ -41,11 +41,22 @@ class RegisterViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         view.addGestureRecognizer(tap)
         
+        fullName.delegate = self
+        email.delegate = self
+        initialPassword.delegate = self
+        confirmPassword.delegate = self
+        
     }
     
     // load in the singleton data model
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance;
+        self.errorLabel.isHidden = true
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        return false
     }
     
     // Handles registration to the firestore database
@@ -80,6 +91,8 @@ class RegisterViewController: UIViewController {
                        }
                        self.eventDataModel.setUser(user: user)
                        
+                       
+                       // creates an empty saved events document for user
                        let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
 
                        savedEventsRef.setData([
@@ -92,6 +105,8 @@ class RegisterViewController: UIViewController {
                            }
                        }
                        
+                       
+                       // creates an empty liked events document for user
                        let likedEventRefs = self.database.collection("liked_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
 
                        likedEventRefs.setData([
@@ -103,6 +118,7 @@ class RegisterViewController: UIViewController {
                                print("Liked event added successfully")
                            }
                        }
+                       
                        
                        let reminderEventRefs = self.database.collection("reminded_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
 
@@ -118,14 +134,20 @@ class RegisterViewController: UIViewController {
                    }
                } else {
                    debug ? print("Passwords do not match") : ()
+                   self.errorLabel.text = "Passwords do not match"
+                   self.errorLabel.isHidden = false
                }
         } else {
             // One or more fields are empty or email format is invalid
             if let email = email.text, email.range(of: "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", options: .regularExpression) == nil {
                 debug ? print("Invalid email format") : ()
+                self.errorLabel.text = "Invalid email format"
             } else {
                 debug ? print("One or more fields are empty or password length is less than 6") : ()
+                self.errorLabel.text = "Empty fields or passord length is < 6"
             }
+            self.errorLabel.isHidden = false
+
         }
 
         

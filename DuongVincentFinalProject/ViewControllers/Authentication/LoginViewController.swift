@@ -10,7 +10,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import Kingfisher
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UITextFieldDelegate {
     
     var debug = true;
     
@@ -20,6 +20,7 @@ class LoginViewController: UIViewController {
     
     @IBOutlet weak var email: UITextField!
     @IBOutlet weak var password: UITextField!
+    @IBOutlet weak var errorLabel: UILabel!
     
     
     var completionHandler: ((User?) -> Void)?
@@ -27,14 +28,25 @@ class LoginViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
+               view.addGestureRecognizer(tap)
+        
+        email.delegate = self
+        password.delegate = self
 
-        // Do any additional setup after loading the view.
     }
+    
+    @objc func dismissKeyboard() {
+          view.endEditing(true)
+      }
     
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance
+        errorLabel.isHidden = true
     }
     
+    //handles registration segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showRegisterView" {
             debug ? print("Showing register view") : ()
@@ -50,11 +62,24 @@ class LoginViewController: UIViewController {
         }
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        return false
+    }
+    
+    // handles the authentication with firebaseAuth when the login button is pressed
     @IBAction func loginPressed(_sender: UIButton) {
         if let email = email.text, !email.isEmpty,
            let password = password.text, !password.isEmpty {
             Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, error in
-                guard self != nil else { return }
+                guard self != nil else {
+                    return
+                }
+                if error != nil {
+                    self?.errorLabel.isHidden = false
+                }
+                
+                // if the user exists the segue will end
                 let returnedUser = authResult?.user;
                 self!.database.collection("users").document(returnedUser?.email ?? "no_email_found").getDocument { (document, error) in
                     if let document = document, document.exists {
@@ -68,6 +93,7 @@ class LoginViewController: UIViewController {
         }
     }
     
+    // ends the segue without logging in
     @IBAction func cancelPressed(_sender: UIButton) {
         self.completionHandler?(nil)
     }

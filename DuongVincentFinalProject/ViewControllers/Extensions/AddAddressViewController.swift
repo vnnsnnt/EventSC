@@ -23,12 +23,14 @@ class AddAddressViewController: UIViewController, UITextFieldDelegate, UITableVi
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        //assigns delegates
         addressTextField.delegate = self
         searchCompleter.delegate = self
         searchResultsTableView.delegate = self
         searchResultsTableView.dataSource = self
     }
 
+    // get every key input change and processes a new query for addresses
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let oldString = textField.text ?? ""
         let newString = (oldString as NSString).replacingCharacters(in: range, with: string)
@@ -37,10 +39,12 @@ class AddAddressViewController: UIViewController, UITextFieldDelegate, UITableVi
         return true
     }
 
+    // returns the number of addresses found as rows
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return searchResults.count
     }
-
+    
+    // draws the addresses out showing the title and address
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell", for: indexPath)
         let searchResult = searchResults[indexPath.row]
@@ -49,6 +53,7 @@ class AddAddressViewController: UIViewController, UITextFieldDelegate, UITableVi
         return cell
     }
     
+    // checks if the user has selected a specific address
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedResult = searchResults[indexPath.row]
         addressTextField.text = selectedResult.title
@@ -56,10 +61,12 @@ class AddAddressViewController: UIViewController, UITextFieldDelegate, UITableVi
         
     }
     
+    // returns back to the caller view controller with the address
     @IBAction func saveAddressPressed(_sender: UIButton) {
         self.completionHandler?(selectedPlace)
     }
     
+    // returns back to the caller view controller without the address
     @IBAction func cancelAddressPressed(_sender: UIButton) {
         self.completionHandler?(nil)
     }
