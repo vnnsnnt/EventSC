@@ -38,7 +38,8 @@ class AddEventViewController: UIViewController, UIImagePickerControllerDelegate,
         if let title = eventTitle.text, !title.isEmpty,
            let description = eventDescription.text, !description.isEmpty,
            let location = eventLocation.text, !location.isEmpty {
-            let event: Event = Event(title: title, description: description, locationTitle: selectedPlace?.title, locationAddress: selectedPlace?.address, image: previewImage.image)
+            let date = eventDatePicker.date
+            let event: Event = Event(title: title, description: description, locationTitle: selectedPlace?.title, locationAddress: selectedPlace?.address, image: previewImage.image, date: date)
             self.completionHandler?(event);
         }
     }

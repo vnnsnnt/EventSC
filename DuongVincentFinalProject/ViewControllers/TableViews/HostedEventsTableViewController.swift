@@ -8,6 +8,7 @@
 import UIKit
 import FirebaseFirestore
 import FirebaseStorage
+import FirebaseAuth
 
 class HostedEventsTableViewController: UITableViewController {
     
@@ -34,17 +35,22 @@ class HostedEventsTableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance;
-        user = eventDataModel.getUser();
+        let user = Auth.auth().currentUser;
         if user == nil {
             debug ? print("Not logged in") : ()
             performSegue(withIdentifier: "showLoginView", sender: nil)
             
         } else {
-            debug ? print("Logged in as \(user?.getName() ?? "name_not_found")") : ()
-            debug ? print(eventDataModel.getHostedEvents().count) : ()
+            database.collection("users").document(user?.email ?? "no_email_found").getDocument { (document, error) in
+                if let document = document, document.exists {
+                    let data = document.data()
+                    let name = data?["name"] as? String ?? "name_not_found"
+                    let loggedInUser : User = User(email: user?.email, name: name)
+                    self.eventDataModel.setUser(user: loggedInUser)
+                    self.getHostedEvents()
+                }
+            }
         }
-        self.tableView.reloadData()
-        
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -75,7 +81,8 @@ class HostedEventsTableViewController: UITableViewController {
                                         "locationTitle": event.getLocationTitle() ?? "location_title_not_found",
                                         "locationAddress": event.getLocationAddress() ?? "location_address_not_found",
                                         "imageUrl": imageUrl,
-                                        "event-id": UUID().uuidString
+                                        "event-id": UUID().uuidString,
+                                        "date": Timestamp(date: event.getDate() ?? Date())
                                     ]
                                     eventRef.setData(eventData)
                                     var newEvent = event
@@ -97,7 +104,7 @@ class HostedEventsTableViewController: UITableViewController {
             loginView.completionHandler = { [self](user: User?) in
                 if let user {
                     self.eventDataModel.setUser(user: user)
-                    
+                    self.getHostedEvents()
                 } else {
                     if let tabBarController = self.tabBarController {
                         tabBarController.selectedIndex = 0
@@ -111,7 +118,7 @@ class HostedEventsTableViewController: UITableViewController {
         if segue.identifier == "showDetailsView" {
             // Get the destination view controller
             let destinationVC = segue.destination as! EventDetailsViewController
-            
+            destinationVC.hidesBottomBarWhenPushed = true
             // Pass the selected event to the destination view controller
             let selectedEvent = sender as! Event
             destinationVC.event = selectedEvent
@@ -125,11 +132,20 @@ class HostedEventsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "eventCell", for: indexPath) as! EventTableViewCell
         cell.eventTitle.text = event.getTitle();
         cell.eventDescription.text = event.getDescription()
-        cell.eventDateTime.text = "10:00 PM, Tuesday, Aug 2023"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "hh:mm a MM/dd/yy"
+        let dateTimeString = dateFormatter.string(from: event.getDate() ?? Date())
+        cell.eventDateTime.text = dateTimeString
         cell.eventLocation.text = "@ " + event.getLocationTitle()!
         let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
         cell.thumbnail.kf.setImage(with: url)
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView,
+               heightForRowAt indexPath: IndexPath) -> CGFloat {
+       // Use the default size for all other rows.
+        return 100
     }
 
     // Override to support conditional editing of the table view.
@@ -204,5 +220,58 @@ class HostedEventsTableViewController: UITableViewController {
         // Pass the selected object to the new view controller.
     }
     */
+    func getHostedEvents() -> Void {
+        let user = eventDataModel.getUser()
+        let eventsRef = database.collection("events")
+        let query = eventsRef.whereField("email", isEqualTo: user?.getEmail() ?? "email_not_found")
+        
+        let savedEventsRef = self.database.collection("saved_events").document(user?.getEmail() ?? "email_not_found")
+        savedEventsRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                let data = document.data()
+                if let savedEventIds = data?["saved_event_ids"] as? [String] {
+                    self.eventDataModel.setSavedEventIds(eventIds: savedEventIds)
+                }
+            }
+        }
+        
+        let likedEventsRef = self.database.collection("liked_events").document(user?.getEmail() ?? "email_not_found")
+        likedEventsRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                let data = document.data()
+                if let likedEventIds = data?["liked_event_ids"] as? [String] {
+                    self.eventDataModel.likedEventIds = likedEventIds
+                }
+            }
+        }
+        
+        query.getDocuments() { (querySnapshot, queryError) in
+            if queryError == nil {
+                let documents = querySnapshot!.documents
+                let savedEventsId = self.eventDataModel.getSavedEventIds()
+                let likedEventsId = self.eventDataModel.likedEventIds
+                var events = [Event]()
+                
+                for document in documents {
+                    let data = document.data()
+                    let title = data["title"] as? String ?? "title_not_found"
+                    let description = data["description"] as? String ?? "description_not_found"
+                    let locationTitle = data["locationTitle"] as? String ?? "location_title_not_found"
+                    let locationAddress = data["locationAddress"] as? String ?? "location_address_not_found"
+                    let imageUrl = data["imageUrl"] as? String ?? "image_not_found"
+                    let eventId = data["event-id"] as? String ?? "event_id_not_found"
+                    let date = data["date"] as? Timestamp
+                    
+                    let isSaved = (savedEventsId.contains(eventId)) ? true : false
+                    let isLiked = (likedEventsId.contains(eventId)) ? true : false
 
+                    
+                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: user?.getEmail(), name: user?.getName()), imageUrl: imageUrl, eventId: eventId, date: date?.dateValue(), savedByCurrentUser: isSaved, likedByCurrentUser: isLiked)
+                    events.append(event)
+                }
+                !events.isEmpty ? self.eventDataModel.setHostedEvents(events: events) : ()
+                self.tableView.reloadData()
+            }
+        }
+    }
 }

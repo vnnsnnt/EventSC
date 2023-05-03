@@ -14,16 +14,11 @@ class EventDataModel: NSObject {
     private var hostedEvents: [Event] = []
     private var user: User?
     private var savedEventIds: [String] = []
+    var remindedEventIds: [String] = []
+    var likedEventIds: [String] = []
     
     override init() {
         
-        // load public events - by location
-        
-        
-        // load saved events - by user
-        
-        
-        // load hosted events - by user
     }
     
     func setUser(user: User?) -> Void {
@@ -74,6 +69,7 @@ class EventDataModel: NSObject {
         self.savedEventIds = eventIds
     }
     
+    
     func getSavedEventIds() -> [String] {
         return self.savedEventIds
     }
@@ -81,6 +77,7 @@ class EventDataModel: NSObject {
     func removeSavedEventId(id: String) {
         self.savedEventIds.removeAll {$0 == id}
     }
+    
     
     func reset() -> Void {
         self.savedEventIds = []

@@ -22,9 +22,11 @@ struct Event {
     private var createDate: Date?
     private var likeCount = 0
     private var eventId: String?
+    private var date: Date?
     var savedByCurrentUser = false
+    var likedByCurrentUser = false
 
-    init(title: String? = nil, description: String? = nil, dateTime: String? = nil, locationTitle: String? = nil, locationAddress: String? = nil, place: Place? = nil, user: User? = nil, imageUrl: String? = nil, image: UIImage? = nil, createDate: Date? = nil, likeCount: Int = 0, eventId: String? = nil, savedByCurrentUser: Bool = false) {
+    init(title: String? = nil, description: String? = nil, dateTime: String? = nil, locationTitle: String? = nil, locationAddress: String? = nil, place: Place? = nil, user: User? = nil, imageUrl: String? = nil, image: UIImage? = nil, createDate: Date? = nil, likeCount: Int = 0, eventId: String? = nil, date: Date? = nil, savedByCurrentUser: Bool = false, likedByCurrentUser: Bool = false) {
         self.title = title
         self.description = description
         self.dateTime = dateTime
@@ -37,9 +39,10 @@ struct Event {
         self.createDate = createDate
         self.likeCount = likeCount
         self.eventId = eventId
+        self.date = date
         self.savedByCurrentUser = savedByCurrentUser
+        self.likedByCurrentUser = likedByCurrentUser
     }
-    
     
     func getTitle() -> String? {
         return self.title;
@@ -59,6 +62,10 @@ struct Event {
     
     func getImage() -> UIImage? {
         return self.image
+    }
+    
+    func getDate() -> Date? {
+        return self.date
     }
     
     func getUser() -> User? {

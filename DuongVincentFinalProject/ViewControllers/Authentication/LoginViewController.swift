@@ -61,33 +61,7 @@ class LoginViewController: UIViewController {
                         let data = document.data()
                         let name = data?["name"] as? String ?? "name_not_found"
                         let user : User = User(email: returnedUser?.email, name: name)
-                        
-                        
-                        let eventsRef = self!.database.collection("events")
-                        let query = eventsRef.whereField("email", isEqualTo: returnedUser?.email ?? "email_not_found")
-                        
-                        query.getDocuments() { (querySnapshot, queryError) in
-                            if queryError == nil {
-                                let documents = querySnapshot!.documents
-                                var events = [Event]()
-                                
-                                for document in documents {
-                                    let data = document.data()
-                                    let title = data["title"] as? String ?? "title_not_found"
-                                    let description = data["description"] as? String ?? "description_not_found"
-                                    let locationTitle = data["locationTitle"] as? String ?? "location_title_not_found"
-                                    let locationAddress = data["locationAddress"] as? String ?? "location_address_not_found"
-                                    let imageUrl = data["imageUrl"] as? String ?? "image_not_found"
-                                    let eventId = data["event-id"] as? String ?? "event_id_not_found"
-                                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: user, imageUrl: imageUrl, eventId: eventId)
-                                    
-                                    events.append(event)
-                                }
-                                
-                                !events.isEmpty ? self?.eventDataModel.setHostedEvents(events: events) : ()
-                                self?.completionHandler?(user);
-                            }
-                        }
+                        self?.completionHandler?(user);
                     }
                 }
             }

@@ -92,6 +92,17 @@ class RegisterViewController: UIViewController {
                            }
                        }
                        
+                       let likedEventRefs = self.database.collection("liked_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+
+                       likedEventRefs.setData([
+                           "liked_event_ids": []
+                       ]) { err in
+                           if let err = err {
+                               print("Error adding saved event: \(err)")
+                           } else {
+                               print("Saved event added successfully")
+                           }
+                       }
                        self.completionHandler?(user)
 
                    }
