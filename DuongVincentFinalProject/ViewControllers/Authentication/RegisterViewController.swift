@@ -98,9 +98,19 @@ class RegisterViewController: UIViewController {
                            "liked_event_ids": []
                        ]) { err in
                            if let err = err {
-                               print("Error adding saved event: \(err)")
+                               print("Error adding liked event: \(err)")
                            } else {
-                               print("Saved event added successfully")
+                               print("Liked event added successfully")
+                           }
+                       }
+                       
+                       let reminderEventRefs = self.database.collection("reminded_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+
+                       reminderEventRefs.setData(self.eventDataModel.remindedEventsDictionary) { err in
+                           if let err = err {
+                               print("Error adding reminder: \(err)")
+                           } else {
+                               print("Reminder added successfuly")
                            }
                        }
                        self.completionHandler?(user)

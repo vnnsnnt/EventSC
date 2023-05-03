@@ -23,10 +23,11 @@ struct Event {
     private var likeCount = 0
     private var eventId: String?
     private var date: Date?
+    private var createdDate: Date?
     var savedByCurrentUser = false
     var likedByCurrentUser = false
 
-    init(title: String? = nil, description: String? = nil, dateTime: String? = nil, locationTitle: String? = nil, locationAddress: String? = nil, place: Place? = nil, user: User? = nil, imageUrl: String? = nil, image: UIImage? = nil, createDate: Date? = nil, likeCount: Int = 0, eventId: String? = nil, date: Date? = nil, savedByCurrentUser: Bool = false, likedByCurrentUser: Bool = false) {
+    init(title: String? = nil, description: String? = nil, dateTime: String? = nil, locationTitle: String? = nil, locationAddress: String? = nil, place: Place? = nil, user: User? = nil, imageUrl: String? = nil, image: UIImage? = nil, createDate: Date? = nil, likeCount: Int = 0, eventId: String? = nil, date: Date? = nil, createdDate: Date? = nil, savedByCurrentUser: Bool = false, likedByCurrentUser: Bool = false) {
         self.title = title
         self.description = description
         self.dateTime = dateTime
@@ -40,6 +41,7 @@ struct Event {
         self.likeCount = likeCount
         self.eventId = eventId
         self.date = date
+        self.createdDate = createdDate
         self.savedByCurrentUser = savedByCurrentUser
         self.likedByCurrentUser = likedByCurrentUser
     }
@@ -106,5 +108,17 @@ struct Event {
     
     mutating func incrementLikes() {
         self.likeCount += 1
+    }
+    
+    mutating func setUser(user: User?) {
+        self.user = user
+    }
+    
+    func getCreationDate() -> Date? {
+        return self.createDate
+    }
+    
+    mutating func setCreationDate(date: Date) {
+        self.createDate = date
     }
 }

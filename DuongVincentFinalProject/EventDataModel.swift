@@ -15,6 +15,7 @@ class EventDataModel: NSObject {
     private var user: User?
     private var savedEventIds: [String] = []
     var remindedEventIds: [String] = []
+    var remindedEventsDictionary = Dictionary<String, String>()
     var likedEventIds: [String] = []
     
     override init() {

@@ -82,11 +82,13 @@ class HostedEventsTableViewController: UITableViewController {
                                         "locationAddress": event.getLocationAddress() ?? "location_address_not_found",
                                         "imageUrl": imageUrl,
                                         "event-id": UUID().uuidString,
-                                        "date": Timestamp(date: event.getDate() ?? Date())
+                                        "date": Timestamp(date: event.getDate() ?? Date()),
+                                        "creation-date": Timestamp(date: Date())
                                     ]
                                     eventRef.setData(eventData)
                                     var newEvent = event
                                     newEvent.setImageUrl(url: imageUrl)
+                                    newEvent.setUser(user: self.eventDataModel.getUser())
                                     self.eventDataModel.addHostedEvent(event: newEvent)
                                     self.tableView.reloadData()
                                 }
@@ -163,32 +165,42 @@ class HostedEventsTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let event = eventDataModel.getHostedEvents()[indexPath.row]
-            // Delete the row from the data source
-            let eventRef = database.collection("events").whereField("email", isEqualTo: event.getUser()!.getEmail()!).whereField("title", isEqualTo: event.getTitle()!)
-            eventRef.getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    print("Error getting event: \(error.localizedDescription)")
-                    return
-                }
-                guard let documents = querySnapshot?.documents else {
-                    print("Event not found")
-                    return
-                }
-                for document in documents {
-                    print("inside here")
-                    document.reference.delete { (error) in
-                        if let error = error {
-                            print("Error deleting event: \(error.localizedDescription)")
-                        } else {
-                            print("Event deleted successfully")
+            
+            // Show an alert to confirm the deletion of the event
+            let alertController = UIAlertController(title: "Delete Event", message: "Are you sure you want to delete this event?", preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+            alertController.addAction(cancelAction)
+            let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { (_) in
+                // Delete the event from the database
+                let eventRef = self.database.collection("events").whereField("email", isEqualTo: event.getUser()!.getEmail()!).whereField("title", isEqualTo: event.getTitle()!)
+                eventRef.getDocuments { (querySnapshot, error) in
+                    if let error = error {
+                        print("Error getting event: \(error.localizedDescription)")
+                        return
+                    }
+                    guard let documents = querySnapshot?.documents else {
+                        print("Event not found")
+                        return
+                    }
+                    for document in documents {
+                        print("inside here")
+                        document.reference.delete { (error) in
+                            if let error = error {
+                                print("Error deleting event: \(error.localizedDescription)")
+                            } else {
+                                print("Event deleted successfully")
+                            }
                         }
                     }
+                    self.eventDataModel.removeHostedEvent(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .fade)
                 }
-                self.eventDataModel.removeHostedEvent(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .fade)
             }
+            alertController.addAction(deleteAction)
+            present(alertController, animated: true)
         }
     }
+
 
     @IBAction func editButtonPressed(_sender: UIBarButtonItem) {
         self.tableView.isEditing = !self.tableView.isEditing;
@@ -261,15 +273,23 @@ class HostedEventsTableViewController: UITableViewController {
                     let imageUrl = data["imageUrl"] as? String ?? "image_not_found"
                     let eventId = data["event-id"] as? String ?? "event_id_not_found"
                     let date = data["date"] as? Timestamp
+                    let createDate = data["creation-date"] as? Timestamp
                     
                     let isSaved = (savedEventsId.contains(eventId)) ? true : false
                     let isLiked = (likedEventsId.contains(eventId)) ? true : false
 
                     
-                    let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: user?.getEmail(), name: user?.getName()), imageUrl: imageUrl, eventId: eventId, date: date?.dateValue(), savedByCurrentUser: isSaved, likedByCurrentUser: isLiked)
+                    var event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: user?.getEmail(), name: user?.getName()), imageUrl: imageUrl, eventId: eventId, date: date?.dateValue(), savedByCurrentUser: isSaved, likedByCurrentUser: isLiked)
+                    event.setCreationDate(date: createDate?.dateValue() ?? Date())
+                    
                     events.append(event)
                 }
-                !events.isEmpty ? self.eventDataModel.setHostedEvents(events: events) : ()
+                
+                let sortedEvents = events.sorted { (event1, event2) -> Bool in
+                    return event1.getDate()?.compare(event2.getDate() ?? Date()) == .orderedDescending
+                }
+                
+                !sortedEvents.isEmpty ? self.eventDataModel.setHostedEvents(events: sortedEvents) : ()
                 self.tableView.reloadData()
             }
         }

@@ -15,6 +15,7 @@ class EventDetailsViewController: UIViewController {
     var event: Event?
     var place: Place?
     
+    let apiKey = "4c7cc6efbc224207980221154233004"
     let database = Firestore.firestore()
     
     @IBOutlet weak var eventTitle: UILabel!
@@ -29,6 +30,15 @@ class EventDetailsViewController: UIViewController {
     @IBOutlet weak var mapButton: UIButton!
     @IBOutlet weak var dateTimeLabel: UILabel!
     @IBOutlet weak var addReminderButton: UIBarButtonItem!
+    @IBOutlet weak var weatherConditionsLabel: UILabel!
+    @IBOutlet weak var bookmarkButton: UIButton!
+    
+    let emptyBellImage = UIImage(systemName: "bell")?.withRenderingMode(.alwaysTemplate)
+    let filledBellImage = UIImage(systemName: "bell.fill")?.withRenderingMode(.alwaysTemplate)
+    let emptyHeart = UIImage(systemName: "heart")?.withRenderingMode(.alwaysTemplate)
+    let filledHeart = UIImage(systemName: "heart.fill")?.withRenderingMode(.alwaysTemplate)
+    let emptyBook = UIImage(systemName: "book")?.withRenderingMode(.alwaysTemplate)
+    let filledBook = UIImage(systemName: "book.fill")?.withRenderingMode(.alwaysTemplate)
     
     private var eventDataModel: EventDataModel!
 
@@ -40,6 +50,7 @@ class EventDetailsViewController: UIViewController {
         addReminderButton.image = emptyBellImage
         let emptyHeart = UIImage(systemName: "heart")?.withRenderingMode(.alwaysTemplate)
         likeBUtton.setImage(emptyHeart, for: .normal)
+
         
 
     }
@@ -47,35 +58,90 @@ class EventDetailsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         eventDataModel = EventDataModel.sharedInstance
         if let event {
-            let emptyBellImage = UIImage(systemName: "bell")?.withRenderingMode(.alwaysTemplate)
-            let filledBellImage = UIImage(systemName: "bell.fill")?.withRenderingMode(.alwaysTemplate)
-            let emptyHeart = UIImage(systemName: "heart")?.withRenderingMode(.alwaysTemplate)
-            let filledHeart = UIImage(systemName: "heart.fill")?.withRenderingMode(.alwaysTemplate)
-            
             let eventDataModel = EventDataModel.sharedInstance
             if eventDataModel.remindedEventIds.contains(event.getEventId() ?? "event_id_not_found") {
                 addReminderButton.image = filledBellImage
             } else {
                 addReminderButton.image = emptyBellImage
             }
-
+            
+            self.getLikeCount()
+            
             if eventDataModel.likedEventIds.contains(event.getEventId() ?? "event_id_not_found") {
-                self.likeBUtton.setImage(filledHeart, for: .normal)
+                likeBUtton.setImage(filledHeart, for: .normal)
             } else {
-                self.likeBUtton.setImage(emptyHeart, for: .normal)
+                likeBUtton.setImage(emptyHeart, for: .normal)
             }
+            
+            if eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found") {
+                bookmarkButton.setImage(filledBook, for: .normal)
+            } else {
+                bookmarkButton.setImage(emptyBook, for: .normal)
+            }
+            
             
             eventTitle.text = event.getTitle()
             eventHoster.text = "by \(event.getUser()?.getName() ?? "Unknown Name")"
             eventDescription.text = event.getDescription()
             eventLocation.text = "\(event.getLocationTitle() ?? "No Location Title"), \(event.getLocationAddress() ?? "No Location Address Provided")"
-            let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
-            eventThumbnail.kf.setImage(with: url)
-            likesLabel.text = (event.getLikeCount()! > 0 ? "liked by \(event.getLikeCount()!) people" : "Be the first to like this event")
+            let image_url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
+            eventThumbnail.kf.setImage(with: image_url)
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "hh:mm a MM/dd/yy"
             let dateTimeString = dateFormatter.string(from: event.getDate() ?? Date())
             dateTimeLabel.text = dateTimeString
+            
+            
+            let location = "\(event.getLocationAddress() ?? "No Address Found")"
+            let locationEncoded = location.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+            
+            let dateFormatter2 = DateFormatter()
+            dateFormatter2.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+            let dateString = dateFormatter2.string(from: event.getDate() ?? Date())
+           
+            // Create the API request URL with the necessary parameters
+            let urlString = "https://api.weatherapi.com/v1/forecast.json?key=\(apiKey)&q=\(locationEncoded)&dt=\(dateString)"
+            let url = URL(string: urlString)!
+           
+            // Send the API request and process the response
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                guard let data = data, error == nil else {
+                    print("Error: \(error!)")
+                    return
+                }
+               
+               // Parse the response JSON to extract the forecasted temperature and condition
+                
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+                    let forecast = json["forecast"] as! [String: Any]
+                    let forecastday = forecast["forecastday"] as! [[String: Any]]
+                    guard let forecastday = forecast["forecastday"] as? [[String: Any]], !forecastday.isEmpty else {
+                        // Handle the case where forecastday is empty or not an array
+                        DispatchQueue.main.async {
+                            self.weatherConditionsLabel.text = "Unable to fetch weather data."
+                        }
+                        return
+                    }
+
+                    let hour = forecastday[0]["hour"] as! [[String: Any]]
+                    let tempF = hour[0]["temp_f"] as! Double
+                    let condition = hour[0]["condition"] as! [String: Any]
+                    let text = condition["text"] as! String
+                    
+                    // Update the UI on the main thread with the forecasted weather information
+                    DispatchQueue.main.async {
+                        self.weatherConditionsLabel.text = "Temperature: \(tempF)°F, Condition: \(text)"
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.weatherConditionsLabel.text = "Unable to fetch weather data."
+                    }
+                }
+            }
+            
+            task.resume()
+
         }
     }
     
@@ -104,6 +170,7 @@ class EventDetailsViewController: UIViewController {
                 print("Liked event added successfully")
             }
         }
+        self.getLikeCount()
     }
     
     @IBAction func mapPressed(_sender: UIButton) {
@@ -155,22 +222,132 @@ class EventDetailsViewController: UIViewController {
     }
 
     func createReminder(in eventStore: EKEventStore) {
-        let reminder = EKReminder(eventStore: eventStore)
-        reminder.title = event?.getTitle() ?? "New Event"
-        reminder.calendar = eventStore.defaultCalendarForNewReminders()
-        reminder.dueDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: event?.getDate() ?? Date())
-        
-        do {
-            try eventStore.save(reminder, commit: true)
-            print("Reminder added successfully.")
-            let filledBellImage = UIImage(systemName: "bell.fill")?.withRenderingMode(.alwaysTemplate)
-            let eventDataModel = EventDataModel.sharedInstance;
-            eventDataModel.remindedEventIds.append(event?.getEventId() ?? "event_id_not_found")
-            addReminderButton.image = filledBellImage
-        } catch {
-            print("Reminder could not be added: \(error.localizedDescription)")
+        if self.eventDataModel.remindedEventIds.contains(self.event?.getEventId() ?? "event_id_not_found") {
+            self.removeReminder(eventStore: eventStore, calendarItemIdentifier: self.eventDataModel.remindedEventsDictionary[self.event?.getEventId() ?? "event_id_not_found"] ?? "item_identifier_not_found")
+                
+        } else {
+            let alertController = UIAlertController(title: "Create Reminder", message: "Are you sure you want to create a reminder for this event?", preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            alertController.addAction(UIAlertAction(title: "Create", style: .default, handler: { _ in
+                let reminder = EKReminder(eventStore: eventStore)
+                reminder.title = self.event?.getTitle() ?? "New Event"
+                reminder.calendar = eventStore.defaultCalendarForNewReminders()
+                reminder.dueDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: self.event?.getDate() ?? Date())
+                
+                do {
+                    try eventStore.save(reminder, commit: true)
+                    print("Reminder added successfully.")
+                    
+                    let filledBellImage = UIImage(systemName: "bell.fill")?.withRenderingMode(.alwaysTemplate)
+                    let eventDataModel = EventDataModel.sharedInstance;
+                    eventDataModel.remindedEventIds.append(self.event?.getEventId() ?? "event_id_not_found")
+                    eventDataModel.remindedEventsDictionary[self.event?.getEventId() ?? "event_id_not_found"] = reminder.calendarItemIdentifier
+                    
+                    let reminderEventRefs = self.database.collection("reminded_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+                    
+                    reminderEventRefs.setData(self.eventDataModel.remindedEventsDictionary) { err in
+                        if let err = err {
+                            print("Error adding reminder: \(err)")
+                        } else {
+                            print("Reminder added successfuly")
+                        }
+                    }
+                    self.addReminderButton.image = filledBellImage
+                    
+                } catch {
+                    print("Reminder could not be added: \(error.localizedDescription)")
+                }
+            }))
+            present(alertController, animated: true, completion: nil)
         }
     }
     
+    func removeReminder(eventStore: EKEventStore, calendarItemIdentifier: String) {
+        // Fetch the reminder with the given calendar item identifier
+        let reminder = eventStore.calendarItem(withIdentifier: calendarItemIdentifier) as? EKReminder
 
+        if let reminder = reminder {
+            // Create an alert to confirm the user wants to remove the reminder
+            let alertController = UIAlertController(title: "Remove Reminder", message: "Are you sure you want to remove this reminder?", preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            alertController.addAction(UIAlertAction(title: "Remove", style: .destructive, handler: { _ in
+                do {
+                    // Remove the reminder from the event store
+                    try eventStore.remove(reminder, commit: true)
+                    self.eventDataModel.remindedEventIds.removeAll {$0 == self.event?.getEventId() ?? "event_id_not_found"}
+                    print("Reminder removed successfully.")
+                    self.addReminderButton.image = self.emptyBellImage
+                    
+                    self.eventDataModel.remindedEventsDictionary.removeValue(forKey: self.event?.getEventId() ?? "event_id_not_found")
+                    
+                    let reminderEventRefs = self.database.collection("reminded_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+                    
+                    reminderEventRefs.setData(self.eventDataModel.remindedEventsDictionary) { err in
+                        if let err = err {
+                            print("Error adding reminder: \(err)")
+                        } else {
+                            print("Reminder added successfuly")
+                        }
+                    }
+                    
+                } catch {
+                    print("Error removing reminder: \(error.localizedDescription)")
+                }
+            }))
+            // Present the alert to the user
+            present(alertController, animated: true, completion: nil)
+        } else {
+            print("Reminder with identifier \(calendarItemIdentifier) not found.")
+        }
+    }
+
+
+
+
+    
+    @IBAction func bookmarkButtonPressed(_sender: UIButton) {
+        
+        if eventDataModel.getSavedEventIds().contains(event?.getEventId() ?? "event_id_not_found") {
+            eventDataModel.removeSavedEventId(id: event?.getEventId() ?? "event_id_not_found")
+            print(eventDataModel.getSavedEventIds().contains(event?.getEventId() ?? "event_id_not_found"))
+            bookmarkButton.setImage(emptyBook, for: .normal)
+        } else {
+            eventDataModel.addSavedEventId(id: event?.getEventId() ?? "event_id_not_found")
+            bookmarkButton.setImage(filledBook, for: .normal)
+        }
+        
+        let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
+        
+        savedEventsRef.setData ([
+            "saved_event_ids": self.eventDataModel.getSavedEventIds()
+        ]) { err in
+            if let err = err {
+                print("Error adding saved event: \(err)")
+            } else {
+                print("Saved event added successfully")
+            }
+        }
+    }
+    
+    func getLikeCount() -> Void {
+        let eventIdToCount = event?.getEventId() ?? "event_id_not_found"
+
+        let likedEventRefs = database.collection("liked_events")
+        likedEventRefs.whereField("liked_event_ids", arrayContains: eventIdToCount)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error retrieving liked events: \(error.localizedDescription)")
+                } else {
+                    var userCount = 0
+                    for document in querySnapshot!.documents {
+                        let likedEventIds = document.data()["liked_event_ids"] as! [String]
+                        if likedEventIds.contains(eventIdToCount) {
+                            userCount += 1
+                        }
+                    }
+                    self.likesLabel.text = "liked by \(userCount) users"
+                }
+            }
+    }
+    
 }

@@ -99,6 +99,9 @@ class SavedEventsTableViewController: UITableViewController {
         let dateTimeString = dateFormatter.string(from: event.getDate() ?? Date())
         cell.eventDateTime.text = dateTimeString
         cell.eventLocation.text = "\(event.getLocationTitle() ?? "No Location Title"), \(event.getLocationAddress() ?? "No Location Address")"
+        
+        cell.notificationIndicator.isHidden = (eventDataModel.remindedEventIds.contains(event.getEventId() ?? "event_id_not_found")) ? false : true
+        
 //        cell.bookmarkIndicator.isHidden = (eventDataModel.getSavedEventIds().contains(event.getEventId() ?? "event_id_not_found")) ? false : true
         let url = URL(string: event.getImageUrl() ?? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM=")
         cell.thumbnail.kf.setImage(with: url)
@@ -124,7 +127,7 @@ class SavedEventsTableViewController: UITableViewController {
                 self.eventDataModel.removeSavedEventId(id: event.getEventId() ?? "event_id_not_found")
                 tableView.reloadRows(at: [indexPath], with: .right) // reload the cell to update the UI
                 let savedEventsRef = self.database.collection("saved_events").document(self.eventDataModel.getUser()?.getEmail() ?? "email_not_found")
-                
+            
                 savedEventsRef.setData ([
                     "saved_event_ids": self.eventDataModel.getSavedEventIds()
                 ]) { err in
@@ -132,6 +135,7 @@ class SavedEventsTableViewController: UITableViewController {
                         print("Error adding saved event: \(err)")
                     } else {
                         print("Saved event added successfully")
+                        self.getSavedEvents()
                     }
                 }
                 completionHandler(true)
@@ -169,15 +173,25 @@ class SavedEventsTableViewController: UITableViewController {
                                         let name = data["name"] as? String ?? "name_not_found"
                                         let eventId = data["event-id"] as? String ?? "event_id_not_found"
                                         let date = data["date"] as? Timestamp
-                                        let event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId, date: date?.dateValue(), savedByCurrentUser: false)
+                                        let createDate = data["creation-date"] as? Timestamp
+                                        var event = Event(title: title, description: description, locationTitle: locationTitle, locationAddress: locationAddress, user: User(email: email, name: name), imageUrl: imageUrl, eventId: eventId, date: date?.dateValue(), savedByCurrentUser: false)
+                                        event.setCreationDate(date: createDate?.dateValue() ?? Date())
                                         events.append(event)
                                     }
-                                    self.eventDataModel.setSavedEvents(events: events)
+                                    
+                                    let sortedEvents = events.sorted { (event1, event2) -> Bool in
+                                        return event1.getDate()?.compare(event2.getDate() ?? Date()) == .orderedDescending
+                                    }
+                                    
+                                    self.eventDataModel.setSavedEvents(events: sortedEvents)
                                     self.tableView.reloadData()
                                 } else {
                                     print("Error getting documents: \(queryError!)")
                                 }
                             }
+                    } else {
+                        self.eventDataModel.setSavedEvents(events: [])
+                        self.tableView.reloadData()
                     }
                 } else {
                     print("No saved event IDs found")
